@@ -250,18 +250,19 @@ chenxao = Button(W - 440, 1010, 180, 45, 'Чэнь Сяо', manager, visible=0)
 WJSN_btn = [bona, dayeon_wj, yeorym, seola, chenxao]
 
 Solo = Button(W - 250, 1010, 240, 45, 'SOLO', manager)
-eyn = Button(W - 440, 510, 180, 45, 'Еын', manager, visible=0)
-yena = Button(W - 440, 560, 180, 45, 'Йена', manager, visible=0)
-chaeyon = Button(W - 440, 610, 180, 45, 'Ли Чеён', manager, visible=0)
-nayn = Button(W - 440, 660, 180, 45, 'Наын', manager, visible=0)
-somi = Button(W - 440, 710, 180, 45, 'Соми', manager, visible=0)
-sunmi = Button(W - 440, 760, 180, 45, 'Сонми', manager, visible=0)
-sohee = Button(W - 440, 810, 180, 45, 'Сохи', manager, visible=0)
-eunbi = Button(W - 440, 860, 180, 45, 'Ынби', manager, visible=0)
-choa = Button(W - 440, 910, 180, 45, 'Чоа', manager, visible=0)
-chungha = Button(W - 440, 960, 180, 45, 'Чонха', manager, visible=0)
-tsuki = Button(W - 440, 1010, 180, 45, 'Цуки', manager, visible=0)
-Solo_btn = [eyn, yena, chaeyon, nayn, somi, sunmi, sohee, eunbi, choa, chungha, tsuki]
+eyn = Button(W - 440, 460, 180, 45, 'Еын', manager, visible=0)
+yena = Button(W - 440, 510, 180, 45, 'Йена', manager, visible=0)
+chaeyon = Button(W - 440, 560, 180, 45, 'Ли Чеён', manager, visible=0)
+nayn = Button(W - 440, 610, 180, 45, 'Наын', manager, visible=0)
+somi = Button(W - 440, 660, 180, 45, 'Соми', manager, visible=0)
+sunmi = Button(W - 440, 710, 180, 45, 'Сонми', manager, visible=0)
+sohee = Button(W - 440, 760, 180, 45, 'Сохи', manager, visible=0)
+eunbi = Button(W - 440, 810, 180, 45, 'Ынби', manager, visible=0)
+choa = Button(W - 440, 860, 180, 45, 'Чоа', manager, visible=0)
+chungha = Button(W - 440, 910, 180, 45, 'Чонха', manager, visible=0)
+tsuki = Button(W - 440, 960, 180, 45, 'Цуки', manager, visible=0)
+yuri = Button(W - 440, 1010, 180, 45, 'Юри', manager, visible=0)
+Solo_btn = [eyn, yena, chaeyon, nayn, somi, sunmi, sohee, eunbi, choa, chungha, tsuki, yuri]
 
 all_btn = Aespa_btn + Blackpink_btn + Dreamcatcher_btn + Everglow_btn + Fromis_9_btn + Gidle_btn + ITZY_btn + IVE_btn\
           + Kep1er_btn + LeSserafim_btn + LOONA_btn + Mamamoo_btn + Momoland_btn + NMIXX_btn + Oh_My_Girl_btn\
@@ -578,6 +579,8 @@ def start():
                     save_load('Чонха')
                 if event.ui_element == tsuki:
                     save_load('Цуки')
+                if event.ui_element == yuri:
+                    save_load('Юри')
 
                 if event.ui_element == not_sort:
                     save_load('[Прочее]')
