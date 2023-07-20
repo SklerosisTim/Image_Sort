@@ -1,28 +1,38 @@
 import pygame
 import sys
-import pygame_gui as pg
+import tkinter
+import tkinter.filedialog
 
 pygame.init()
 W, H = 800, 600
 display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 60
+path_folder = "<No File Selected>"
+
+
+def prompt_file():
+    """Create a Tk file dialog and cleanup when finished"""
+    top = tkinter.Tk()
+    top.withdraw()  # hide window
+    file_name = tkinter.filedialog.askdirectory(parent=top)
+    top.destroy()
+    return file_name
 
 
 def start():
-    manager = pg.UIManager((W, H), 'json/main.json')
-    display.fill('white')
+    global path_folder
     cycle = True
     while cycle:
-        time_delta = clock.tick(60) / 1000.0
+        display.fill('white')
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            manager.process_events(event)
+            if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+                path_folder = prompt_file()
 
-        manager.update(time_delta)
-        manager.draw_ui(display)
+        pygame.display.set_caption(f"{path_folder}")
         pygame.display.update()
         clock.tick(fps)
 
