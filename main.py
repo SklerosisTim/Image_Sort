@@ -25,13 +25,6 @@ class Button(pg.elements.UIButton):
                                       visible=visible)
 
 
-# выпадающее меню
-class DDMenu(pg.elements.UIDropDownMenu):
-    def __init__(self, x, y, w, h, options_list, starting_option, mngr):
-        pg.elements.UIDropDownMenu.__init__(self, relative_rect=pygame.Rect((x, y), (w, h)),
-                                            options_list=options_list, starting_option=starting_option, manager=mngr)
-
-
 # надписи
 def print_text(message, x, y, f_color='black', bg_color=None, f_size=30, font='arial'):
     font_type = pygame.font.SysFont(font, f_size)
@@ -63,7 +56,6 @@ def image_load():
                 img_opened = resize_img
                 img_name = img
                 img_path = path_img
-                print(f'Загружена картинка {img_path}')
             else:
                 print(f'Формат {img.split(".")[-1]} не поддерживается')
         except IndexError:
