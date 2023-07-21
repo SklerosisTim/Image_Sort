@@ -13,6 +13,7 @@ fps = 30
 manager = pg.UIManager((W, H), 'json/main.json')
 open_folder = "<No File Selected>"
 file_types = ['jpg', 'jpeg', 'png']
+img_original = pygame.Surface((1920, 1080))
 img_opened = pygame.Surface((1920, 1080))
 img_name = ''
 img_path = ''
@@ -42,7 +43,7 @@ def prompt_folder():
 
 
 def image_load():
-    global img_opened, img_path, img_name
+    global img_opened, img_original, img_path, img_name
     if open_folder != "<No File Selected>":
         try:
             img = listdir(open_folder)[0]
@@ -53,6 +54,7 @@ def image_load():
                 scale = min(W / iw, H / ih)
                 new_size = (round(iw * scale), round(ih * scale))
                 resize_img = pygame.transform.smoothscale(original_img, new_size)
+                img_original = original_img
                 img_opened = resize_img
                 img_name = img
                 img_path = path_img
@@ -66,7 +68,7 @@ def save_load(name_target_folder):
     target_folder = path.join(r'C:\kpop\[Тест]', name_target_folder)
     if not path.isdir(target_folder):
         mkdir(target_folder)
-    pygame.image.save(img_opened, path.join(target_folder, img_name))
+    pygame.image.save(img_original, path.join(target_folder, img_name))
     remove(img_path)
     image_load()
 
