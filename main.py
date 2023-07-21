@@ -14,8 +14,8 @@ manager = pg.UIManager((W, H), 'json/main.json')
 saving_folder = r'C:\kpop'
 open_folder = "<Папка не выбрана>"
 file_types = ['jpg', 'jpeg', 'png']
-img_original = pygame.Surface((1920, 1080))
-img_opened = pygame.Surface((1920, 1080))
+img_original = pygame.Surface((W, H))
+img_opened = pygame.Surface((W, H))
 img_name = ''
 img_path = ''
 all_girl_btn = []
@@ -300,12 +300,11 @@ def start():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_SPACE:
-                    if open_folder == "<Папка не выбрана>":
-                        open_folder = prompt_folder()
-                    else:
-                        image_load()
+            if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+                if open_folder == "<Папка не выбрана>":
+                    open_folder = prompt_folder()
+                else:
+                    image_load()
 
             if event.type == pg.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
