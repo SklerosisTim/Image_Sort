@@ -11,7 +11,8 @@ display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 30
 manager = pg.UIManager((W, H), 'json/main.json')
-open_folder = "<No File Selected>"
+saving_folder = r'C:\kpop'
+open_folder = "<Папка не выбрана>"
 file_types = ['jpg', 'jpeg', 'png']
 img_original = pygame.Surface((1920, 1080))
 img_opened = pygame.Surface((1920, 1080))
@@ -44,7 +45,7 @@ def prompt_folder():
 
 def image_load():
     global img_opened, img_original, img_path, img_name
-    if open_folder != "<No File Selected>":
+    if open_folder != "<Папка не выбрана>":
         try:
             img = listdir(open_folder)[0]
             if img.split('.')[-1] in file_types:
@@ -65,10 +66,11 @@ def image_load():
 
 
 def save_load(name_target_folder):
-    target_folder = path.join(r'C:\kpop\[Тест]', name_target_folder)
+    target_folder = path.join(saving_folder, name_target_folder)
     if not path.isdir(target_folder):
         mkdir(target_folder)
     pygame.image.save(img_original, path.join(target_folder, img_name))
+    print(f'Сохранено в {target_folder}')
     remove(img_path)
     image_load()
 
@@ -150,7 +152,7 @@ Kep1er = Button(W - 250, 410, 240, 45, 'Kep1er', manager)
 dayeon = Button(W - 440, 410, 180, 45, 'Даён', manager, visible=0)
 yenyn = Button(W - 440, 460, 180, 45, 'Енын', manager, visible=0)
 xaotin = Button(W - 440, 510, 180, 45, 'Сяотин', manager, visible=0)
-yujin_kp = Button(W - 440, 560, 180, 45, 'Юджин', manager, visible=0)
+yujin_kp = Button(W - 440, 560, 180, 45, 'Юджин(k)', manager, visible=0)
 Kep1er_btn = [dayeon, yenyn, xaotin, yujin_kp]
 
 LeSserafim = Button(W - 250, 460, 240, 45, 'LeSserafim', manager)
@@ -237,7 +239,7 @@ VIVIZ_btn = [sinb, umji, eunha, sowon]
 
 WJSN = Button(W - 250, 960, 240, 45, 'WJSN', manager)
 bona = Button(W - 440, 810, 180, 45, 'Бона', manager, visible=0)
-dayeon_wj = Button(W - 440, 860, 180, 45, 'Даён', manager, visible=0)
+dayeon_wj = Button(W - 440, 860, 180, 45, 'Даён(wj)', manager, visible=0)
 yeorym = Button(W - 440, 910, 180, 45, 'Ерым', manager, visible=0)
 seola = Button(W - 440, 960, 180, 45, 'Сольа', manager, visible=0)
 chenxao = Button(W - 440, 1010, 180, 45, 'Чэнь Сяо', manager, visible=0)
@@ -268,6 +270,10 @@ del_img = Button(W - 960, 1010, 240, 45, 'Удалить', manager)
 
 def start():
     global open_folder
+
+    def save_load_btn(btn):
+        if event.ui_element == btn:
+            save_load(btn.text)
 
     cycle = True
     while cycle:
@@ -327,267 +333,19 @@ def start():
                 if event.ui_element == Solo:
                     switch_btn_visible(Solo_btn)
             if event.type == pg.UI_BUTTON_PRESSED:
-                if event.ui_element == winter:
-                    save_load('Винтер')
-                if event.ui_element == giselle:
-                    save_load('Жизель')
-                if event.ui_element == karina:
-                    save_load('Карина')
-                if event.ui_element == ningning:
-                    save_load('НинНин')
-
-                if event.ui_element == jennie:
-                    save_load('Дженни')
-                if event.ui_element == jisoo:
-                    save_load('Джису')
-                if event.ui_element == lisa:
-                    save_load('Лиса')
-                if event.ui_element == rose:
-                    save_load('Розэ')
-
-                if event.ui_element == gah:
-                    save_load('Гахён')
-                if event.ui_element == dami:
-                    save_load('Дами')
-                if event.ui_element == jiu:
-                    save_load('Джию')
-                if event.ui_element == sua:
-                    save_load('Суа')
-                if event.ui_element == dongie:
-                    save_load('Хандон')
-                if event.ui_element == sieon:
-                    save_load('Шиён')
-                if event.ui_element == yooheon:
-                    save_load('Юхён')
-
-                if event.ui_element == aisha:
-                    save_load('Айша')
-                if event.ui_element == iron:
-                    save_load('Ирон')
-                if event.ui_element == mia:
-                    save_load('Миа')
-                if event.ui_element == onda:
-                    save_load('Онда')
-                if event.ui_element == siheon:
-                    save_load('Шихён')
-                if event.ui_element == eu:
-                    save_load('EU')
-
-                if event.ui_element == guri:
-                    save_load('Гюри')
-                if event.ui_element == jiwon:
-                    save_load('Дживон')
-                if event.ui_element == jisun:
-                    save_load('Джисун')
-                if event.ui_element == jiheon:
-                    save_load('Джихён')
-                if event.ui_element == nageon:
-                    save_load('Нагён')
-                if event.ui_element == saerom:
-                    save_load('Сэром')
-                if event.ui_element == haeon:
-                    save_load('Хаён')
-
-                if event.ui_element == mieon:
-                    save_load('Миён')
-                if event.ui_element == minni:
-                    save_load('Минни')
-                if event.ui_element == soeon:
-                    save_load('Соён')
-                if event.ui_element == sujin:
-                    save_load('Суджин')
-                if event.ui_element == shuhua:
-                    save_load('Шухуа')
-                if event.ui_element == uqi:
-                    save_load('Юки')
-
-                if event.ui_element == eji:
-                    save_load('Еджи')
-                if event.ui_element == lia:
-                    save_load('Лиа')
-                if event.ui_element == rujin:
-                    save_load('Рюджин')
-                if event.ui_element == chaeren:
-                    save_load('Чeрён')
-                if event.ui_element == yuna:
-                    save_load('Юна')
-
-                if event.ui_element == woneon:
-                    save_load('Вонён')
-                if event.ui_element == yujin:
-                    save_load('Юджин')
-
-                if event.ui_element == dayeon:
-                    save_load('Даён')
-                if event.ui_element == yenyn:
-                    save_load('Енын')
-                if event.ui_element == xaotin:
-                    save_load('Сяотин')
-                if event.ui_element == yujin_kp:
-                    save_load('Юджин(k)')
-
-                if event.ui_element == kazuha:
-                    save_load('Казуха')
-                if event.ui_element == sakura:
-                    save_load('Сакура')
-                if event.ui_element == chaewon:
-                    save_load('Чевон')
-                if event.ui_element == yunjin:
-                    save_load('Юнджин')
-
-                if event.ui_element == vivi:
-                    save_load('Виви')
-                if event.ui_element == gowon:
-                    save_load('Говон')
-                if event.ui_element == jinsoul:
-                    save_load('Джинсоль')
-                if event.ui_element == yojin:
-                    save_load('Ёджин')
-                if event.ui_element == ives:
-                    save_load('Ив')
-                if event.ui_element == kimlip:
-                    save_load('Ким Лип')
-                if event.ui_element == olivia:
-                    save_load('Оливия Хе')
-                if event.ui_element == hasyl:
-                    save_load('Хасыль')
-                if event.ui_element == heonjin:
-                    save_load('Хёнджин')
-                if event.ui_element == heejin:
-                    save_load('Хиджин')
-                if event.ui_element == choerry:
-                    save_load('Чоерри')
-                if event.ui_element == chu:
-                    save_load('Чу')
-
-                if event.ui_element == moon:
-                    save_load('Мунбёль')
-                if event.ui_element == solar:
-                    save_load('Сола')
-                if event.ui_element == hwasa:
-                    save_load('Хваса')
-                if event.ui_element == wheen:
-                    save_load('Хвиин')
-
-                if event.ui_element == ahin:
-                    save_load('Ахин')
-                if event.ui_element == jooe:
-                    save_load('Джуи')
-                if event.ui_element == nancy:
-                    save_load('Нэнси')
-
-                if event.ui_element == bae:
-                    save_load('Бае')
-                if event.ui_element == sollun:
-                    save_load('Соллюн')
-                if event.ui_element == haewon:
-                    save_load('Хэвон')
-
-                if event.ui_element == arin:
-                    save_load('Арин')
-                if event.ui_element == binnie:
-                    save_load('Бинни')
-                if event.ui_element == jiho:
-                    save_load('Джихо')
-                if event.ui_element == mimi:
-                    save_load('Мими')
-                if event.ui_element == synghee:
-                    save_load('Сынхи')
-                if event.ui_element == hyojeon:
-                    save_load('Хёджон')
-                if event.ui_element == yua:
-                    save_load('Юа')
-
-                if event.ui_element == irene:
-                    save_load('Айрин')
-                if event.ui_element == wendy:
-                    save_load('Вэнди')
-                if event.ui_element == joy:
-                    save_load('Джой')
-                if event.ui_element == seulgi:
-                    save_load('Сыльги')
-
-                if event.ui_element == juri:
-                    save_load('Джури')
-                if event.ui_element == yeonhee:
-                    save_load('Ёнхи')
-                if event.ui_element == suyun:
-                    save_load('Суюн')
-                if event.ui_element == yunkyon:
-                    save_load('Юнкён')
-
-                if event.ui_element == dahyeon:
-                    save_load('Дахён')
-                if event.ui_element == jihyo:
-                    save_load('Джихё')
-                if event.ui_element == mina:
-                    save_load('Мина')
-                if event.ui_element == momo:
-                    save_load('Момо')
-                if event.ui_element == nayeon:
-                    save_load('Наён')
-                if event.ui_element == sana:
-                    save_load('Сана')
-                if event.ui_element == tzu:
-                    save_load('Тзуи')
-
-                if event.ui_element == sinb:
-                    save_load('Синби')
-                if event.ui_element == umji:
-                    save_load('Умджи')
-                if event.ui_element == eunha:
-                    save_load('Ынха')
-                if event.ui_element == sowon:
-                    save_load('Совон')
-
-                if event.ui_element == bona:
-                    save_load('Бона')
-                if event.ui_element == dayeon_wj:
-                    save_load('Даён(wj)')
-                if event.ui_element == yeorym:
-                    save_load('Ерым')
-                if event.ui_element == seola:
-                    save_load('Сольа')
-                if event.ui_element == chenxao:
-                    save_load('Чэнь Сяо')
-
-                if event.ui_element == eyn:
-                    save_load('Еын')
-                if event.ui_element == yena:
-                    save_load('Йена')
-                if event.ui_element == chaeyon:
-                    save_load('Ли Чеён')
-                if event.ui_element == nayn:
-                    save_load('Наын')
-                if event.ui_element == somi:
-                    save_load('Соми')
-                if event.ui_element == sunmi:
-                    save_load('Сонми')
-                if event.ui_element == sohee:
-                    save_load('Сохи')
-                if event.ui_element == eunbi:
-                    save_load('Ынби')
-                if event.ui_element == choa:
-                    save_load('Чоа')
-                if event.ui_element == chungha:
-                    save_load('Чонха')
-                if event.ui_element == tsuki:
-                    save_load('Цуки')
-                if event.ui_element == yuri:
-                    save_load('Юри')
-
-                if event.ui_element == not_sort:
-                    save_load('[Прочее]')
-                if event.ui_element == del_img:
-                    remove(img_path)
-                    image_load()
+                save_load_btn(event.ui_element)
 
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
         print_text(f'{open_folder}', 10, H - 40, f_color='red')
-        if open_folder != "<No File Selected>":
-            print_text(f'{len(listdir(open_folder))}', 10, H - 80, f_color='red')
+        if open_folder == "<Папка не выбрана>":
+            print_text('Нажми <Q> чтобы выбрать папку', 10, H - 80, f_color='red')
+        if img_name == '':
+            print_text('Нажми <Пробел> для загрузки изображения', 10, H - 120, f_color='red')
+        if open_folder != "<Папка не выбрана>":
+            print_text(img_name, 10, H - 120, f_color='red')
+            print_text(f'Количество: {len(listdir(open_folder))}', 10, H - 80, f_color='red')
         manager.update(time_delta)
         manager.draw_ui(display)
         pygame.display.update()
