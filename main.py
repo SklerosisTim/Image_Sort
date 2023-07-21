@@ -271,10 +271,6 @@ del_img = Button(W - 960, 1010, 240, 45, 'Удалить', manager)
 def start():
     global open_folder
 
-    def save_load_btn(btn):
-        if event.ui_element == btn:
-            save_load(btn.text)
-
     cycle = True
     while cycle:
         time_delta = clock.tick(fps)
@@ -333,7 +329,7 @@ def start():
                 if event.ui_element == Solo:
                     switch_btn_visible(Solo_btn)
             if event.type == pg.UI_BUTTON_PRESSED:
-                save_load_btn(event.ui_element)
+                save_load(event.ui_element.text)
 
             manager.process_events(event)
 
