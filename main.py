@@ -19,6 +19,7 @@ img_opened = pygame.Surface((W, H))
 img_name = ''
 img_path = ''
 all_girl_btn = []
+stat_option = False
 
 
 # кнопки
@@ -111,10 +112,27 @@ def button_draw():
             y += 50
 
 
+def statistic():
+    stat = []
+    for name in listdir(saving_folder):
+        if name != '[Удалить]' and name != '[Прочее]':
+            path_name = path.join(saving_folder, name)
+            if path.isdir(path_name):
+                stat.append([len(listdir(path_name)), name])
+    stat.sort(reverse=True)
+    place, step = 1, 0
+    for value, name in stat:
+        print_text(f'{place}. {name}: {value}', 10, 10 + step, 'orange')
+        place += 1
+        step += 40
+        if place == 24:
+            break
+
+
 def start():
-    global open_folder, saving_folder
-    Button(W - 700, 1010, 240, 45, 'Прочее', manager)
-    Button(W - 960, 1010, 240, 45, 'Удалить', manager)
+    global open_folder, saving_folder, stat_option
+    Button(W - 700, 1010, 240, 45, '[Прочее]', manager)
+    Button(W - 960, 1010, 240, 45, '[Удалить]', manager)
     cycle = True
     while cycle:
         time_delta = clock.tick(fps)
@@ -131,6 +149,8 @@ def start():
                         image_load()
                 if event.key == pygame.K_q:
                     saving_folder = prompt_folder()
+                if event.key == pygame.K_w:
+                    stat_option = not stat_option
 
             if event.type == pg.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
@@ -147,8 +167,12 @@ def start():
         elif img_name == '':
             print_text('<Пробел> - загрузка изображения / <Q> - поменять папку сохранения', 10, H - 80, f_color='red')
         else:
+            if not stat_option:
+                print_text('<W> - включение статистики', 10, 10, 'red')
             print_text(img_name, 10, H - 120, f_color='red')
             print_text(f'Количество: {len(listdir(open_folder))}', 10, H - 80, f_color='red')
+
+        statistic() if stat_option else None
         manager.update(time_delta)
         manager.draw_ui(display)
         pygame.display.update()
@@ -157,6 +181,7 @@ def start():
 
 if __name__ == '__main__':
     button_draw()
+    statistic()
     start()
 
 pygame.quit()
