@@ -64,7 +64,7 @@ def image_load():
             else:
                 print(f'Формат {img.split(".")[-1]} не поддерживается')
         except IndexError:
-            img_opened = pygame.image.load('Mina-Sana-Kfapfakes.jpg').convert()
+            img_opened = pygame.Surface((W, H))
 
 
 def save_load(name_target_folder):
@@ -110,13 +110,10 @@ def button_draw():
             y += 50
 
 
-not_sort = Button(W - 700, 1010, 240, 45, 'Прочее', manager)
-del_img = Button(W - 960, 1010, 240, 45, 'Удалить', manager)
-
-
 def start():
     global open_folder
-
+    Button(W - 700, 1010, 240, 45, 'Прочее', manager)
+    Button(W - 960, 1010, 240, 45, 'Удалить', manager)
     cycle = True
     while cycle:
         time_delta = clock.tick(fps)
