@@ -71,10 +71,11 @@ def save_load(name_target_folder):
     target_folder = path.join(saving_folder, name_target_folder)
     if not path.isdir(target_folder):
         mkdir(target_folder)
-    pygame.image.save(img_original, path.join(target_folder, img_name))
-    print(f'{img_name} сохранено в {target_folder}')
-    remove(img_path)
-    image_load()
+    if img_name != '':
+        pygame.image.save(img_original, path.join(target_folder, img_name))
+        print(f'{img_name} сохранено в {target_folder}')
+        remove(img_path)
+        image_load()
 
 
 def switch_btn_visible(list_btn):
@@ -111,7 +112,7 @@ def button_draw():
 
 
 def start():
-    global open_folder
+    global open_folder, saving_folder
     Button(W - 700, 1010, 240, 45, 'Прочее', manager)
     Button(W - 960, 1010, 240, 45, 'Удалить', manager)
     cycle = True
@@ -122,11 +123,14 @@ def start():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-                if open_folder == "<Папка не выбрана>":
-                    open_folder = prompt_folder()
-                else:
-                    image_load()
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    if open_folder == "<Папка не выбрана>":
+                        open_folder = prompt_folder()
+                    else:
+                        image_load()
+                if event.key == pygame.K_q:
+                    saving_folder = prompt_folder()
 
             if event.type == pg.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
@@ -136,11 +140,12 @@ def start():
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
-        print_text(f'{open_folder}', 10, H - 40, f_color='red')
+        print_text(f'Источник: {open_folder} / Папка сохранения: {saving_folder}', 10, H - 40, f_color='red')
         if open_folder == "<Папка не выбрана>":
-            print_text('Нажми <Пробел> чтобы выбрать папку', 10, H - 80, f_color='red')
+            print_text('<Пробел> - выбрать источник / <Q> - поменять папку сохранения',
+                       10, H - 80, f_color='red')
         elif img_name == '':
-            print_text('Еще раз нажми <Пробел> для загрузки изображения', 10, H - 80, f_color='red')
+            print_text('<Пробел> - загрузка изображения / <Q> - поменять папку сохранения', 10, H - 80, f_color='red')
         else:
             print_text(img_name, 10, H - 120, f_color='red')
             print_text(f'Количество: {len(listdir(open_folder))}', 10, H - 80, f_color='red')
