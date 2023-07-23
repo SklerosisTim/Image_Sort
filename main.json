@@ -1,0 +1,32 @@
+{"button": {
+    "colours": {
+      "normal_bg": "white",
+      "hovered_bg": "orange",
+      "disabled_bg": "gray",
+      "selected_bg": "red",
+      "active_bg": "red",
+      "normal_text": "black",
+      "hovered_text": "black",
+      "disabled_text": "gray",
+      "selected_text": "black",
+      "active_text": "white",
+      "text_shadow": "black",
+      "normal_border": "orange",
+      "hovered_border": "red",
+      "disabled_border": "gray",
+      "selected_border": "orange",
+      "active_border": "orange"
+    },
+    "font": {
+      "name": "Morice-Bejar",
+      "size": 35,
+      "regular_path": "Morice-Bejar.ttf"
+    },
+    "misc": {
+      "shape": "rounded_rectangle",
+      "shape_corner_radius": "5",
+      "border_width": "2",
+      "shadow_width": "2"
+    }
+  }
+}

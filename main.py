@@ -2,7 +2,7 @@ import pygame
 import sys
 import tkinter
 import tkinter.filedialog
-import pygame_gui as pg
+import pygame_gui
 from os import listdir, path, remove, mkdir
 
 pygame.init()
@@ -10,7 +10,7 @@ W, H = 1920, 1080
 display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 30
-manager = pg.UIManager((W, H), 'json/main.json')
+manager = pygame_gui.UIManager((W, H), 'main.json')
 saving_folder = r'C:\kpop'
 open_folder = "<Папка не выбрана>"
 file_types = ['jpg', 'jpeg', 'png']
@@ -23,10 +23,10 @@ stat_option = False
 
 
 # кнопки
-class Button(pg.elements.UIButton):
+class Button(pygame_gui.elements.UIButton):
     def __init__(self, x, y, w, h, text, mngr, visible=1):
-        pg.elements.UIButton.__init__(self, relative_rect=pygame.Rect((x, y), (w, h)), text=text, manager=mngr,
-                                      visible=visible)
+        pygame_gui.elements.UIButton.__init__(self, relative_rect=pygame.Rect((x, y), (w, h)), text=text, manager=mngr,
+                                              visible=visible)
         self.group = []
 
 
@@ -91,7 +91,7 @@ def switch_btn_visible(list_btn):
 
 def button_draw():
     global all_girl_btn
-    with open('girl_group.txt', 'r', encoding='utf8') as girl_groups:
+    with open('buttons.txt', 'r', encoding='utf8') as girl_groups:
         x, y, w, h = 1670, 10, 240, 45
         for num, line in enumerate(girl_groups):
             if num == 21:
@@ -152,9 +152,9 @@ def start():
                 if event.key == pygame.K_w:
                     stat_option = not stat_option
 
-            if event.type == pg.UI_BUTTON_ON_HOVERED:
+            if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
-            if event.type == pg.UI_BUTTON_PRESSED:
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 save_load(event.ui_element.text)
 
             manager.process_events(event)
