@@ -11,7 +11,7 @@ display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 30
 manager = pygame_gui.UIManager((W, H), 'main.json')
-saving_folder = r'C:\kpop'
+saving_folder = r'C:/kpop'
 open_folder = "<Папка не выбрана>"
 file_types = ['jpg', 'jpeg', 'png']
 img_original = pygame.Surface((W, H))
@@ -20,6 +20,7 @@ img_name = ''
 img_path = ''
 all_girl_btn = []
 stat_option = False
+last_update = ''
 
 
 # кнопки
@@ -69,6 +70,8 @@ def image_load():
 
 
 def save_load(name_target_folder):
+    global last_update
+    last_update = name_target_folder
     target_folder = path.join(saving_folder, name_target_folder)
     if not path.isdir(target_folder):
         mkdir(target_folder)
@@ -120,12 +123,13 @@ def statistic():
             if path.isdir(path_name):
                 stat.append([len(listdir(path_name)), name])
     stat.sort(reverse=True)
-    place, step = 1, 0
+    place, step, upd = 1, 0, ''
     for value, name in stat:
-        print_text(f'{place}. {name}: {value}', 10, 10 + step, 'orange')
+        upd = '+' if name == last_update else ''
+        print_text(f'{place}. {name}: {value} {upd}', 10, 10 + step, 'orange')
         place += 1
-        step += 40
-        if place == 24:
+        step += 32
+        if place == 31:
             break
 
 
@@ -151,6 +155,9 @@ def start():
                     saving_folder = prompt_folder()
                 if event.key == pygame.K_w:
                     stat_option = not stat_option
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
 
             if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
@@ -160,17 +167,19 @@ def start():
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
-        print_text(f'Источник: {open_folder} / Папка сохранения: {saving_folder}', 10, H - 40, f_color='red')
+        print_text(f'Источник: {open_folder}', 10, H - 40, f_color='red')
+        print_text(f'Папка сохранения: {saving_folder}', 450, H - 40, f_color='red')
         if open_folder == "<Папка не выбрана>":
-            print_text('<Пробел> - выбрать источник / <Q> - поменять папку сохранения',
-                       10, H - 80, f_color='red')
+            print_text('<Пробел> - выбрать источник', 10, H - 80, f_color='red')
+            print_text('<Q> - поменять папку сохранения', 450, H - 80, f_color='red')
         elif img_name == '':
-            print_text('<Пробел> - загрузка изображения / <Q> - поменять папку сохранения', 10, H - 80, f_color='red')
+            print_text('<Пробел> - загрузка изображения', 10, H - 80, f_color='red')
+            print_text('<Q> - поменять папку сохранения', 450, H - 80, f_color='red')
         else:
             if not stat_option:
                 print_text('<W> - включение статистики', 10, 10, 'red')
-            print_text(img_name, 10, H - 120, f_color='red')
             print_text(f'Количество: {len(listdir(open_folder))}', 10, H - 80, f_color='red')
+            print_text(img_name, 300, H - 80, f_color='red')
 
         statistic() if stat_option else None
         manager.update(time_delta)
