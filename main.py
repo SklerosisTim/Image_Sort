@@ -64,7 +64,7 @@ def image_load():
                 img_name = img
                 img_path = path_img
             else:
-                print(f'Формат {img.split(".")[-1]} не поддерживается')
+                print_text(f'Формат {img.split(".")[-1]} не поддерживается', W // 2 - 300, H // 2 - 100, 'red')
         except IndexError:
             img_opened = pygame.Surface((W, H))
 
@@ -97,7 +97,7 @@ def button_draw():
     with open('buttons.txt', 'r', encoding='utf8') as girl_groups:
         x, y, w, h = 1670, 10, 240, 45
         for num, line in enumerate(girl_groups):
-            if num == 21:
+            if num > 20:
                 break
             group = line.split(' ')[0]
             group_btn = Button(x, y, w, h, group, manager)
@@ -129,7 +129,7 @@ def statistic():
         print_text(f'{place}. {name}: {value} {upd}', 10, 10 + step, 'orange')
         place += 1
         step += 32
-        if place == 31:
+        if place > 30:
             break
 
 
@@ -167,19 +167,19 @@ def start():
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
-        print_text(f'Источник: {open_folder}', 10, H - 40, f_color='red')
-        print_text(f'Папка сохранения: {saving_folder}', 450, H - 40, f_color='red')
+        print_text(f'Источник: {open_folder}', 10, H - 40, 'red')
+        print_text(f'Папка сохранения: {saving_folder}', 450, H - 40, 'red')
         if open_folder == "<Папка не выбрана>":
-            print_text('<Пробел> - выбрать источник', 10, H - 80, f_color='red')
-            print_text('<Q> - поменять папку сохранения', 450, H - 80, f_color='red')
+            print_text('<Пробел> - выбрать источник', 10, H - 80, 'red')
+            print_text('<Q> - поменять папку сохранения', 450, H - 80, 'red')
         elif img_name == '':
-            print_text('<Пробел> - загрузка изображения', 10, H - 80, f_color='red')
-            print_text('<Q> - поменять папку сохранения', 450, H - 80, f_color='red')
+            print_text('<Пробел> - загрузка изображения', 10, H - 80, 'red')
+            print_text('<Q> - поменять папку сохранения', 450, H - 80, 'red')
         else:
             if not stat_option:
                 print_text('<W> - включение статистики', 10, 10, 'red')
-            print_text(f'Количество: {len(listdir(open_folder))}', 10, H - 80, f_color='red')
-            print_text(img_name, 300, H - 80, f_color='red')
+            print_text(f'Количество: {len(listdir(open_folder))}', 10, H - 80, 'red')
+            print_text(img_name, 300, H - 80, 'red')
 
         statistic() if stat_option else None
         manager.update(time_delta)
