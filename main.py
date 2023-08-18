@@ -2,6 +2,7 @@ import pygame
 import pygame_gui
 import tkinter
 import tkinter.filedialog
+import subprocess
 from sys import exit
 from os import listdir, path, remove, mkdir
 
@@ -19,9 +20,10 @@ img_original = pygame.Surface((W, H))
 img_opened = pygame.Surface((W, H))
 img_name = ''
 img_path = ''
+last_saving_img_path = ''
 all_girl_btn = []
 stat_option = False
-last_update = ''
+last_update_folder = ''
 stat = []
 
 
@@ -74,13 +76,14 @@ def image_load():
 
 
 def save_load(name_target_folder):
-    global last_update
-    last_update = name_target_folder
+    global last_update_folder, last_saving_img_path
+    last_update_folder = name_target_folder
     target_folder = path.join(saving_folder, name_target_folder)
     if not path.isdir(target_folder):
         mkdir(target_folder)
     if img_name != '':
-        pygame.image.save(img_original, path.join(target_folder, img_name))
+        last_saving_img_path = path.join(target_folder, img_name)
+        pygame.image.save(img_original, last_saving_img_path)
         print(f'{img_name} сохранено в {target_folder}')
         remove(img_path)
         image_load()
@@ -132,7 +135,7 @@ def statistic():
 def draw_stat():
     place, step = 1, 0
     for value, name in stat:
-        upd = '+' if name == last_update else ''
+        upd = '+' if name == last_update_folder else ''
         print_text(f'{place}. {name}: {value} {upd}', 10, 10 + step, 'black')
         place += 1
         step += 32
@@ -164,6 +167,9 @@ def start():
                     saving_folder = prompt_folder()
                 if event.key == pygame.K_w:
                     stat_option = not stat_option
+                if event.key == pygame.K_z:
+                    if last_saving_img_path != '':
+                        subprocess.run('explorer /select, ' + last_saving_img_path)
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     exit()
