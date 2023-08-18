@@ -1,6 +1,6 @@
 {"button": {
     "colours": {
-      "normal_bg": "white",
+      "normal_bg": "gray",
       "hovered_bg": "orange",
       "disabled_bg": "gray",
       "selected_bg": "red",

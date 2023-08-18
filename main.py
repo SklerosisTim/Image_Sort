@@ -1,8 +1,8 @@
 import pygame
-import sys
+import pygame_gui
 import tkinter
 import tkinter.filedialog
-import pygame_gui
+from sys import exit
 from os import listdir, path, remove, mkdir
 
 pygame.init()
@@ -11,7 +11,7 @@ display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 30
 manager = pygame_gui.UIManager((W, H), 'main.json')
-saving_folder = r'C:/kpop'
+saving_folder = r'D:/[Photo]'
 open_folder = "<Папка не выбрана>"
 file_types = ['jpg', 'jpeg', 'png']
 img_original = pygame.Surface((W, H))
@@ -21,6 +21,7 @@ img_path = ''
 all_girl_btn = []
 stat_option = False
 last_update = ''
+stat = []
 
 
 # кнопки
@@ -92,7 +93,7 @@ def switch_btn_visible(list_btn):
             btn.visible = 1
 
 
-def button_draw():
+def buttons_draw():
     global all_girl_btn
     with open('buttons.txt', 'r', encoding='utf8') as girl_groups:
         x, y, w, h = 1670, 10, 240, 45
@@ -116,14 +117,17 @@ def button_draw():
 
 
 def statistic():
-    stat = []
+    stat.clear()
     for name in listdir(saving_folder):
         if name != '[Удалить]' and name != '[Прочее]':
             path_name = path.join(saving_folder, name)
             if path.isdir(path_name):
                 stat.append([len(listdir(path_name)), name])
     stat.sort(reverse=True)
-    place, step, upd = 1, 0, ''
+
+
+def draw_stat():
+    place, step = 1, 0
     for value, name in stat:
         upd = '+' if name == last_update else ''
         print_text(f'{place}. {name}: {value} {upd}', 10, 10 + step, 'orange')
@@ -137,6 +141,7 @@ def start():
     global open_folder, saving_folder, stat_option
     Button(W - 700, 1010, 240, 45, '[Прочее]', manager)
     Button(W - 960, 1010, 240, 45, '[Удалить]', manager)
+    buttons_draw()
     cycle = True
     while cycle:
         time_delta = clock.tick(fps)
@@ -144,32 +149,34 @@ def start():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()
+                exit()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
-                    if open_folder == "<Папка не выбрана>":
+                    if open_folder == "<Папка не выбрана>" or len(listdir(open_folder)) == 0:
                         open_folder = prompt_folder()
                     else:
                         image_load()
+                        statistic()
                 if event.key == pygame.K_q:
                     saving_folder = prompt_folder()
                 if event.key == pygame.K_w:
                     stat_option = not stat_option
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
-                    sys.exit()
+                    exit()
 
             if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 save_load(event.ui_element.text)
+                statistic()
 
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
         print_text(f'Источник: {open_folder}', 10, H - 40, 'red')
         print_text(f'Папка сохранения: {saving_folder}', 450, H - 40, 'red')
-        if open_folder == "<Папка не выбрана>":
+        if open_folder == "<Папка не выбрана>" or len(listdir(open_folder)) == 0:
             print_text('<Пробел> - выбрать источник', 10, H - 80, 'red')
             print_text('<Q> - поменять папку сохранения', 450, H - 80, 'red')
         elif img_name == '':
@@ -181,7 +188,7 @@ def start():
             print_text(f'Количество: {len(listdir(open_folder))}', 10, H - 80, 'red')
             print_text(img_name, 300, H - 80, 'red')
 
-        statistic() if stat_option else None
+        draw_stat() if stat_option else None
         manager.update(time_delta)
         manager.draw_ui(display)
         pygame.display.update()
@@ -189,9 +196,7 @@ def start():
 
 
 if __name__ == '__main__':
-    button_draw()
-    statistic()
     start()
 
 pygame.quit()
-sys.exit()
+exit()
