@@ -1,4 +1,5 @@
-{"button": {
+{
+  "button": {
     "colours": {
       "normal_bg": "gray",
       "hovered_bg": "orange",

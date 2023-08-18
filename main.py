@@ -7,11 +7,12 @@ from os import listdir, path, remove, mkdir
 
 pygame.init()
 W, H = 1920, 1080
+iw, ih = 1920, 1080
 display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 30
 manager = pygame_gui.UIManager((W, H), 'main.json')
-saving_folder = r'D:/[Photo]'
+saving_folder = r'D:\[Photo]'
 open_folder = "<Папка не выбрана>"
 file_types = ['jpg', 'jpeg', 'png']
 img_original = pygame.Surface((W, H))
@@ -35,7 +36,9 @@ class Button(pygame_gui.elements.UIButton):
 # надписи
 def print_text(message, x, y, f_color='black', bg_color=None, f_size=30, font='arial'):
     font_type = pygame.font.SysFont(font, f_size)
+    shadow_surf = font_type.render(message, True, 'white')
     text_surf = font_type.render(message, True, f_color, bg_color)
+    display.blit(shadow_surf, (x + 1, y + 1))
     display.blit(text_surf, (x, y))
 
 
@@ -49,7 +52,7 @@ def prompt_folder():
 
 
 def image_load():
-    global img_opened, img_original, img_path, img_name
+    global img_opened, img_original, img_path, img_name, iw, ih
     if open_folder != "<Папка не выбрана>":
         try:
             img = listdir(open_folder)[0]
@@ -130,7 +133,7 @@ def draw_stat():
     place, step = 1, 0
     for value, name in stat:
         upd = '+' if name == last_update else ''
-        print_text(f'{place}. {name}: {value} {upd}', 10, 10 + step, 'orange')
+        print_text(f'{place}. {name}: {value} {upd}', 10, 10 + step, 'black')
         place += 1
         step += 32
         if place > 30:
@@ -145,7 +148,7 @@ def start():
     cycle = True
     while cycle:
         time_delta = clock.tick(fps)
-        display.fill('black')
+        display.fill('gray')
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -174,8 +177,9 @@ def start():
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
-        print_text(f'Источник: {open_folder}', 10, H - 40, 'red')
-        print_text(f'Папка сохранения: {saving_folder}', 450, H - 40, 'red')
+        num = len(listdir(open_folder)) if open_folder != "<Папка не выбрана>" else 0
+        print_text(f'Источник: {open_folder} ({num})', 10, H - 40, 'brown')
+        print_text(f'Папка сохранения: {saving_folder}', 500, H - 40, 'brown')
         if open_folder == "<Папка не выбрана>" or len(listdir(open_folder)) == 0:
             print_text('<Пробел> - выбрать источник', 10, H - 80, 'red')
             print_text('<Q> - поменять папку сохранения', 450, H - 80, 'red')
@@ -185,8 +189,7 @@ def start():
         else:
             if not stat_option:
                 print_text('<W> - включение статистики', 10, 10, 'red')
-            print_text(f'Количество: {len(listdir(open_folder))}', 10, H - 80, 'red')
-            print_text(img_name, 300, H - 80, 'red')
+            print_text(f'{img_name}  ( {iw} / {ih} )', 10, H - 80, 'brown')
 
         draw_stat() if stat_option else None
         manager.update(time_delta)
