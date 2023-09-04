@@ -1,9 +1,3 @@
 /.idea
 /venv
-/save
-/data
-settings.py
-save_data.bak
-save_data.dat
-save_data.dir
 1.py
