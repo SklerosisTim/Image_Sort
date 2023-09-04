@@ -25,6 +25,7 @@ all_girl_btn = []
 stat_option = False
 last_update_folder = ''
 stat = []
+fullscreen = False
 
 
 # кнопки
@@ -143,6 +144,15 @@ def draw_stat():
             break
 
 
+def fullscreen_switch():
+    global display, fullscreen
+    fullscreen = not fullscreen
+    if fullscreen:
+        display = pygame.display.set_mode((W, H), pygame.FULLSCREEN)
+    else:
+        display = pygame.display.set_mode((W, H))
+
+
 def start():
     global open_folder, saving_folder, stat_option
     Button(W - 700, 1010, 240, 45, '[Прочее]', manager)
@@ -170,6 +180,8 @@ def start():
                 if event.key == pygame.K_z:
                     if last_saving_img_path != '':
                         subprocess.run('explorer /select, ' + last_saving_img_path)
+                if event.key == pygame.K_f:
+                    fullscreen_switch()
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     exit()
