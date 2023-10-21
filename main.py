@@ -2,9 +2,10 @@ import pygame
 import pygame_gui
 import tkinter
 import tkinter.filedialog
-import subprocess
+from subprocess import run
 from sys import exit
 from os import listdir, path, remove, mkdir
+from re import sub
 
 pygame.init()
 W, H = 1920, 1080
@@ -59,6 +60,7 @@ def image_load():
     if open_folder != "<Папка не выбрана>":
         try:
             img = listdir(open_folder)[0]
+            print(img)
             if img.split('.')[-1] in file_types:
                 path_img = path.join(open_folder, img)
                 original_img = pygame.image.load(path_img).convert()
@@ -71,7 +73,7 @@ def image_load():
                 img_name = img
                 img_path = path_img
             else:
-                print_text(f'Формат {img.split(".")[-1]} не поддерживается', W // 2 - 300, H // 2 - 100, 'red')
+                print(f'Формат {img.split(".")[-1]} не поддерживается')
         except IndexError:
             img_opened = pygame.Surface((W, H))
 
@@ -136,8 +138,8 @@ def statistic():
 def draw_stat():
     place, step = 1, 0
     for value, name in stat:
-        upd = '+' if name == last_update_folder else ''
-        print_text(f'{place}. {name}: {value} {upd}', 10, 10 + step, 'black')
+        upd_color = 'yellow' if name == last_update_folder else None
+        print_text(f'{place}. {name}: {value}', 10, 10 + step, bg_color=upd_color)
         place += 1
         step += 32
         if place > 30:
@@ -179,7 +181,7 @@ def start():
                     stat_option = not stat_option
                 if event.key == pygame.K_z:
                     if last_saving_img_path != '':
-                        subprocess.run('explorer /select, ' + last_saving_img_path)
+                        run('explorer /select, ' + last_saving_img_path)
                 if event.key == pygame.K_f:
                     fullscreen_switch()
                 if event.key == pygame.K_ESCAPE:
@@ -189,7 +191,7 @@ def start():
             if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                save_load(event.ui_element.text)
+                save_load(sub('\n', '', event.ui_element.text))
                 statistic()
 
             manager.process_events(event)
