@@ -15,8 +15,8 @@ clock = pygame.time.Clock()
 fps = 30
 manager = pygame_gui.UIManager((W, H), 'main.json')
 saving_folder = r'D:\[Photo]'
-open_folder = "<Папка не выбрана>"
-file_types = ['jpg', 'jpeg', 'png']
+open_folder = ''
+file_types = ('jpg', 'jpeg', 'png')
 img_original = pygame.Surface((W, H))
 img_opened = pygame.Surface((W, H))
 img_name = ''
@@ -56,26 +56,30 @@ def prompt_folder():
 
 
 def image_load():
-    global img_opened, img_original, img_path, img_name, iw, ih
-    if open_folder != "<Папка не выбрана>":
-        try:
-            img = listdir(open_folder)[0]
-            print(img)
-            if img.split('.')[-1] in file_types:
-                path_img = path.join(open_folder, img)
-                original_img = pygame.image.load(path_img).convert()
-                iw, ih = original_img.get_size()
-                scale = min(W / iw, H / ih)
-                new_size = (round(iw * scale), round(ih * scale))
-                resize_img = pygame.transform.smoothscale(original_img, new_size)
-                img_original = original_img
-                img_opened = resize_img
-                img_name = img
-                img_path = path_img
-            else:
-                print(f'Формат {img.split(".")[-1]} не поддерживается')
-        except IndexError:
+    global open_folder, img_opened, img_original, img_path, img_name, iw, ih
+    for img in listdir(open_folder):
+        if img.split('.')[-1] in file_types:
+            path_img = path.join(open_folder, img)
+            original_img = pygame.image.load(path_img).convert()
+            iw, ih = original_img.get_size()
+            scale = min(W / iw, H / ih)
+            new_size = (round(iw * scale), round(ih * scale))
+            resize_img = pygame.transform.smoothscale(original_img, new_size)
+            img_original = original_img
+            img_opened = resize_img
+            img_name = img
+            img_path = path_img
+            break
+        else:
+            open_folder = ''
             img_opened = pygame.Surface((W, H))
+            img_name = ''
+            img_path = ''
+    if len(listdir(open_folder)) == 0:
+        open_folder = ''
+        img_opened = pygame.Surface((W, H))
+        img_name = ''
+        img_path = ''
 
 
 def save_load(name_target_folder):
@@ -85,7 +89,7 @@ def save_load(name_target_folder):
     if not path.isdir(target_folder):
         mkdir(target_folder)
     if img_name != '':
-        last_saving_img_path = path.join(target_folder, img_name)
+        last_saving_img_path = path.normpath(path.join(target_folder, img_name))
         pygame.image.save(img_original, last_saving_img_path)
         print(f'{img_name} сохранено в {target_folder}')
         remove(img_path)
@@ -142,7 +146,7 @@ def draw_stat():
         print_text(f'{place}. {name}: {value}', 10, 10 + step, bg_color=upd_color)
         place += 1
         step += 32
-        if place > 30:
+        if place > 25:
             break
 
 
@@ -170,7 +174,7 @@ def start():
                 exit()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
-                    if open_folder == "<Папка не выбрана>" or len(listdir(open_folder)) == 0:
+                    if open_folder == '':
                         open_folder = prompt_folder()
                     else:
                         image_load()
@@ -180,8 +184,7 @@ def start():
                 if event.key == pygame.K_w:
                     stat_option = not stat_option
                 if event.key == pygame.K_z:
-                    if last_saving_img_path != '':
-                        run('explorer /select, ' + last_saving_img_path)
+                    run('explorer /select, ' + last_saving_img_path)
                 if event.key == pygame.K_f:
                     fullscreen_switch()
                 if event.key == pygame.K_ESCAPE:
@@ -191,25 +194,25 @@ def start():
             if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                save_load(sub('\n', '', event.ui_element.text))
-                statistic()
+                if open_folder != '':
+                    save_load(sub('\n', '', event.ui_element.text))
+                    statistic()
 
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
-        num = len(listdir(open_folder)) if open_folder != "<Папка не выбрана>" else 0
-        print_text(f'Источник: {open_folder} ({num})', 10, H - 40, 'brown')
-        print_text(f'Папка сохранения: {saving_folder}', 500, H - 40, 'brown')
-        if open_folder == "<Папка не выбрана>" or len(listdir(open_folder)) == 0:
-            print_text('<Пробел> - выбрать источник', 10, H - 80, 'red')
-            print_text('<Q> - поменять папку сохранения', 450, H - 80, 'red')
+        num = len(listdir(open_folder)) if open_folder != '' else 0
+        print_text(f'Из: {open_folder} ({num})', 10, H - 80, 'brown')
+        print_text(f'В: {saving_folder}', 10, H - 40, 'brown')
+        print_text('<Q> - изменить папку сохранения', 500, H - 40, 'red')
+        if open_folder == '':
+            print_text('<Пробел> - выбрать рабочую папку', 500, H - 200, 'red', f_size=70)
         elif img_name == '':
-            print_text('<Пробел> - загрузка изображения', 10, H - 80, 'red')
-            print_text('<Q> - поменять папку сохранения', 450, H - 80, 'red')
+            print_text('<Пробел> - загрузка изображения', 500, H - 200, 'red', f_size=70)
         else:
             if not stat_option:
                 print_text('<W> - включение статистики', 10, 10, 'red')
-            print_text(f'{img_name}  ( {iw} / {ih} )', 10, H - 80, 'brown')
+            print_text(f'{img_name}  ( {iw} / {ih} )', 10, H - 120, 'brown')
 
         draw_stat() if stat_option else None
         manager.update(time_delta)
