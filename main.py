@@ -206,9 +206,9 @@ def start():
         print_text(f'В: {saving_folder}', 10, H - 40, 'brown')
         print_text('<Q> - изменить папку сохранения', 500, H - 40, 'red')
         if open_folder == '':
-            print_text('<Пробел> - выбрать рабочую папку', 500, H - 200, 'red', f_size=70)
+            print_text('<Пробел> - выбрать рабочую папку', 400, H - 200, 'red', f_size=70)
         elif img_name == '':
-            print_text('<Пробел> - загрузка изображения', 500, H - 200, 'red', f_size=70)
+            print_text('<Пробел> - загрузка изображения', 400, H - 200, 'red', f_size=70)
         else:
             if not stat_option:
                 print_text('<W> - включение статистики', 10, 10, 'red')
