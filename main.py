@@ -26,7 +26,7 @@ all_girl_btn = []
 stat_option = False
 last_update_folder = ''
 stat = []
-fullscreen = False
+full_screen = False
 
 
 # кнопки
@@ -56,39 +56,35 @@ def prompt_folder():
 
 
 def image_load():
-    global open_folder, img_opened, img_original, img_path, img_name, iw, ih
-    for img in listdir(open_folder):
-        if img.split('.')[-1] in file_types:
-            path_img = path.join(open_folder, img)
-            original_img = pygame.image.load(path_img).convert()
-            iw, ih = original_img.get_size()
-            scale = min(W / iw, H / ih)
-            new_size = (round(iw * scale), round(ih * scale))
-            resize_img = pygame.transform.smoothscale(original_img, new_size)
-            img_original = original_img
-            img_opened = resize_img
-            img_name = img
-            img_path = path_img
-            break
-        else:
-            open_folder = ''
-            img_opened = pygame.Surface((W, H))
-            img_name = ''
-            img_path = ''
-    if len(listdir(open_folder)) == 0:
-        open_folder = ''
-        img_opened = pygame.Surface((W, H))
-        img_name = ''
-        img_path = ''
+    global open_folder, img_opened, img_path, img_name, img_original, iw, ih
+    img_list = listdir(open_folder)
+    if len(img_list) > 0:
+        for img in img_list:
+            if img.split('.')[-1] in file_types:
+                path_img = path.join(open_folder, img)
+                original = pygame.image.load(path_img).convert()
+                iw, ih = original.get_size()
+                scale = min(W / iw, H / ih)
+                new_size = (round(iw * scale), round(ih * scale))
+                resize_img = pygame.transform.smoothscale(original, new_size)
+                img_original = original
+                img_opened = resize_img
+                img_name = img
+                img_path = path_img
+                return
+    open_folder = ''
+    img_opened = pygame.Surface((W, H))
+    img_name = ''
+    img_path = ''
 
 
 def save_load(name_target_folder):
     global last_update_folder, last_saving_img_path
     last_update_folder = name_target_folder
-    target_folder = path.join(saving_folder, name_target_folder)
+    target_folder = path.normpath(path.join(saving_folder, name_target_folder))
     if not path.isdir(target_folder):
         mkdir(target_folder)
-    if img_name != '':
+    if img_name:
         last_saving_img_path = path.normpath(path.join(target_folder, img_name))
         pygame.image.save(img_original, last_saving_img_path)
         print(f'{img_name} сохранено в {target_folder}')
@@ -132,7 +128,7 @@ def buttons_draw():
 def statistic():
     stat.clear()
     for name in listdir(saving_folder):
-        if name != '[Удалить]' and name != '[Прочее]':
+        if name not in ('[Удалить]', '[Прочее]'):
             path_name = path.join(saving_folder, name)
             if path.isdir(path_name):
                 stat.append([len(listdir(path_name)), name])
@@ -143,17 +139,17 @@ def draw_stat():
     place, step = 1, 0
     for value, name in stat:
         upd_color = 'yellow' if name == last_update_folder else None
-        print_text(f'{place}. {name}: {value}', 10, 10 + step, bg_color=upd_color)
+        print_text(f'{place}. {name}: {value}', 10, 60 + step, bg_color=upd_color)
         place += 1
         step += 32
         if place > 25:
             break
 
 
-def fullscreen_switch():
-    global display, fullscreen
-    fullscreen = not fullscreen
-    if fullscreen:
+def full_screen_switch():
+    global display, full_screen
+    full_screen = not full_screen
+    if full_screen:
         display = pygame.display.set_mode((W, H), pygame.FULLSCREEN)
     else:
         display = pygame.display.set_mode((W, H))
@@ -163,6 +159,12 @@ def start():
     global open_folder, saving_folder, stat_option
     Button(W - 700, 1010, 240, 45, '[Прочее]', manager)
     Button(W - 960, 1010, 240, 45, '[Удалить]', manager)
+    load_bt = Button(500, H - 150, 900, 60, 'Загрузить изображение', manager)
+    input_bt = Button(10, H - 80, 100, 35, '---', manager)
+    output_bt = Button(10, H - 40, 100, 35, '---', manager)
+    stat_bt = Button(10, 10, 200, 45, 'Статистика', manager)
+    f_bt = Button(220, 10, 50, 45, 'F', manager)
+    z_bt = Button(280, 10, 50, 45, 'Z', manager)
     buttons_draw()
     cycle = True
     while cycle:
@@ -173,45 +175,44 @@ def start():
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_SPACE:
-                    if open_folder == '':
-                        open_folder = prompt_folder()
-                    else:
-                        image_load()
-                        statistic()
-                if event.key == pygame.K_q:
-                    saving_folder = prompt_folder()
-                if event.key == pygame.K_w:
-                    stat_option = not stat_option
-                if event.key == pygame.K_z:
-                    run('explorer /select, ' + last_saving_img_path)
                 if event.key == pygame.K_f:
-                    fullscreen_switch()
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    exit()
+                    full_screen_switch()
+                if event.key == pygame.K_z:
+                    if last_saving_img_path:
+                        pygame.time.wait(100)
+                        run('explorer /select, ' + last_saving_img_path)
 
             if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
                 switch_btn_visible(event.ui_element.group)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                if open_folder != '':
-                    save_load(sub('\n', '', event.ui_element.text))
-                    statistic()
+                if open_folder:
+                    if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt):
+                        save_load(sub('\n', '', event.ui_element.text))
+                        statistic()
+                    if event.ui_element == load_bt:
+                        image_load()
+                        statistic()
+                    if event.ui_element == stat_bt:
+                        stat_option = not stat_option
+                if event.ui_element == input_bt:
+                    open_folder = prompt_folder()
+                if event.ui_element == output_bt:
+                    saving_folder = prompt_folder()
+                if event.ui_element == f_bt:
+                    full_screen_switch()
+                if event.ui_element == z_bt:
+                    if last_saving_img_path:
+                        pygame.time.wait(100)
+                        run('explorer /select, ' + last_saving_img_path)
 
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
         num = len(listdir(open_folder)) if open_folder != '' else 0
-        print_text(f'Из: {open_folder} ({num})', 10, H - 80, 'brown')
-        print_text(f'В: {saving_folder}', 10, H - 40, 'brown')
-        print_text('<Q> - изменить папку сохранения', 500, H - 40, 'red')
-        if open_folder == '':
-            print_text('<Пробел> - выбрать рабочую папку', 400, H - 200, 'red', f_size=70)
-        elif img_name == '':
-            print_text('<Пробел> - загрузка изображения', 400, H - 200, 'red', f_size=70)
-        else:
-            if not stat_option:
-                print_text('<W> - включение статистики', 10, 10, 'red')
+        print_text(f'Из: {open_folder} ({num})', 120, H - 80, 'brown')
+        print_text(f'В: {saving_folder}', 120, H - 40, 'brown')
+        load_bt.show() if open_folder and not img_name else load_bt.hide()
+        if img_name:
             print_text(f'{img_name}  ( {iw} / {ih} )', 10, H - 120, 'brown')
 
         draw_stat() if stat_option else None
