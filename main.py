@@ -157,17 +157,16 @@ def full_screen_switch():
 
 def start():
     global open_folder, saving_folder, stat_option
-    Button(W - 700, 1010, 240, 45, '[Прочее]', manager)
-    Button(W - 960, 1010, 240, 45, '[Удалить]', manager)
-    load_bt = Button(500, H - 150, 900, 60, 'Загрузить изображение', manager)
+    del_bt = Button(10, H - 130, 160, 45, '[Удалить]', manager)
+    other_bt = Button(180, H - 130, 160, 45, '[Прочее]', manager)
+    load_bt = Button(550, H - 150, 800, 60, 'Загрузить изображение', manager)
     input_bt = Button(10, H - 80, 100, 35, '---', manager)
     output_bt = Button(10, H - 40, 100, 35, '---', manager)
     stat_bt = Button(10, 10, 200, 45, 'Статистика', manager)
     f_bt = Button(220, 10, 50, 45, 'F', manager)
     z_bt = Button(280, 10, 50, 45, 'Z', manager)
     buttons_draw()
-    cycle = True
-    while cycle:
+    while True:
         time_delta = clock.tick(fps)
         display.fill('gray')
         for event in pygame.event.get():
@@ -208,12 +207,17 @@ def start():
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
-        num = len(listdir(open_folder)) if open_folder != '' else 0
+        num = len(listdir(open_folder)) if open_folder else 0
         print_text(f'Из: {open_folder} ({num})', 120, H - 80, 'brown')
         print_text(f'В: {saving_folder}', 120, H - 40, 'brown')
         load_bt.show() if open_folder and not img_name else load_bt.hide()
         if img_name:
-            print_text(f'{img_name}  ( {iw} / {ih} )', 10, H - 120, 'brown')
+            print_text(f'{img_name}  ( {iw} / {ih} )', 340, 10, 'brown')
+            del_bt.show()
+            other_bt.show()
+        else:
+            del_bt.hide()
+            other_bt.hide()
 
         draw_stat() if stat_option else None
         manager.update(time_delta)
