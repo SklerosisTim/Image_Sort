@@ -27,6 +27,7 @@ stat_option = False
 last_update_folder = ''
 stat = []
 full_screen = False
+len_open_folder = 0
 
 
 # кнопки
@@ -155,8 +156,14 @@ def full_screen_switch():
         display = pygame.display.set_mode((W, H))
 
 
+def prog_bar(x, y, w, h, progress, max_progress=100, color1='gray', bg_color='black', surf=display):
+    pygame.draw.rect(surf, bg_color, (x, y, w, h))
+    progress = max_progress if progress > max_progress else progress
+    pygame.draw.rect(surf, color1, (x, y, w, progress / max_progress * h))
+
+
 def start():
-    global open_folder, saving_folder, stat_option
+    global open_folder, saving_folder, stat_option, len_open_folder
     del_bt = Button(10, H - 130, 160, 45, '[Удалить]', manager)
     other_bt = Button(180, H - 130, 160, 45, '[Прочее]', manager)
     load_bt = Button(550, H - 150, 800, 60, 'Загрузить изображение', manager)
@@ -195,6 +202,7 @@ def start():
                         stat_option = not stat_option
                 if event.ui_element == input_bt:
                     open_folder = prompt_folder()
+                    len_open_folder = len(listdir(open_folder))
                 if event.ui_element == output_bt:
                     saving_folder = prompt_folder()
                 if event.ui_element == f_bt:
@@ -207,6 +215,8 @@ def start():
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
+        if open_folder:
+            prog_bar(W - 5, 0, 5, H, len_open_folder - len(listdir(open_folder)), len_open_folder)
         num = len(listdir(open_folder)) if open_folder else 0
         print_text(f'Из: {open_folder} ({num})', 120, H - 80, 'brown')
         print_text(f'В: {saving_folder}', 120, H - 40, 'brown')
