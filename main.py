@@ -1,7 +1,7 @@
-import pygame
-import pygame_gui
 import tkinter
 import tkinter.filedialog
+import pygame
+import pygame_gui
 from subprocess import run
 from sys import exit
 from os import listdir, path, remove, mkdir
@@ -202,7 +202,7 @@ def start():
                         stat_option = not stat_option
                 if event.ui_element == input_bt:
                     open_folder = prompt_folder()
-                    len_open_folder = len(listdir(open_folder))
+                    len_open_folder = len(listdir(open_folder)) if open_folder else 0
                 if event.ui_element == output_bt:
                     saving_folder = prompt_folder()
                 if event.ui_element == f_bt:
@@ -215,7 +215,7 @@ def start():
             manager.process_events(event)
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
-        if open_folder:
+        if open_folder and len(listdir(open_folder)):
             prog_bar(W - 5, 0, 5, H, len_open_folder - len(listdir(open_folder)), len_open_folder)
         num = len(listdir(open_folder)) if open_folder else 0
         print_text(f'Из: {open_folder} ({num})', 120, H - 80, 'brown')
