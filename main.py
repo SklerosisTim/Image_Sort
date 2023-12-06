@@ -94,11 +94,9 @@ def save_load(name_target_folder):
 
 
 def switch_btn_visible(list_btn):
-    if not list_btn:
-        pass
-    else:
-        for btn in all_girl_btn:
-            btn.visible = 0
+    for btn in all_girl_btn:
+        btn.visible = 0
+    if list_btn:
         for btn in list_btn:
             btn.visible = 1
 
@@ -185,11 +183,12 @@ def start():
                     full_screen_switch()
                 if event.key == pygame.K_z:
                     if last_saving_img_path:
-                        pygame.time.wait(100)
+                        pygame.time.wait(200)
                         run('explorer /select, ' + last_saving_img_path)
 
             if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
-                switch_btn_visible(event.ui_element.group)
+                if event.ui_element not in all_girl_btn:
+                    switch_btn_visible(event.ui_element.group)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if open_folder:
                     if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt):
@@ -209,7 +208,7 @@ def start():
                     full_screen_switch()
                 if event.ui_element == z_bt:
                     if last_saving_img_path:
-                        pygame.time.wait(100)
+                        pygame.time.wait(200)
                         run('explorer /select, ' + last_saving_img_path)
 
             manager.process_events(event)
