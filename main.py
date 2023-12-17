@@ -136,7 +136,7 @@ def buttons_kill():
 def statistic():
     stat.clear()
     for name in listdir(saving_folder):
-        if name not in ('[Удалить]', '[Прочее]'):
+        if name not in ('[Удалить]', '[Прочее]', '[разобрать]'):
             path_name = path.join(saving_folder, name)
             if path.isdir(path_name):
                 stat.append([len(listdir(path_name)), name])
@@ -180,8 +180,8 @@ def color_resolution():  # возвращает цвет, в зависимос�
 def start():
     global open_folder, saving_folder, stat_option, buttons
     max_len = None
-    del_bt = Btn((10, 950, 160, 45), '[Удалить]', manager)
-    other_bt = Btn((180, 950, 160, 45), '[Прочее]', manager)
+    del_bt = Btn((1300, 1030, 160, 45), '[Удалить]', manager)
+    other_bt = Btn((1130, 1030, 160, 45), '[Прочее]', manager)
     load_bt = Btn((550, 930, 800, 60), 'Загрузить изображение', manager)
     input_bt = Btn((10, 1000, 100, 35), '---', manager)
     output_bt = Btn((10, 1040, 100, 35), '---', manager)
@@ -242,15 +242,15 @@ def start():
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
         if open_folder and len(listdir(open_folder)):
             num = len(listdir(open_folder))
-            pb = ProgressBar((200, 45), 40, max_bar=max_len, color1='gray50', shadow='orange')
-            pb.draw((10, 900), f'{num}', num)
+            pb = ProgressBar((200, 40), 40, max_bar=max_len, color1='gray50', shadow='orange')
+            pb.draw((10, 950), f'{num}', num)
         txt_brown.write((120, 1000, 400, 35), f'Из: {open_folder}')
         txt_brown.write((120, 1040, 400, 35), f'В: {saving_folder}')
         load_bt.show() if open_folder and not img_name else load_bt.hide()
         if img_name:
             txt_file_info.rect = color_resolution()
-            txt_file_info.write((800, 1040, 85, 35), f'{img_name.split('.')[-1]}')
-            txt_file_info.write((890, 1040, 230, 35), f'{iw} / {ih}')
+            txt_file_info.write((800, 1030, 85, 45), f'{img_name.split('.')[-1]}')
+            txt_file_info.write((890, 1030, 230, 45), f'{iw} / {ih}')
             del_bt.show()
             other_bt.show()
         else:
