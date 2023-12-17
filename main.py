@@ -6,7 +6,7 @@ from subprocess import run
 from sys import exit
 from os import listdir, path, remove, mkdir
 from re import sub
-from interface import Text
+from interface import Text, Button, ProgressBar
 
 pygame.init()
 W, H = 1920, 1080
@@ -16,7 +16,7 @@ clock = pygame.time.Clock()
 fps = 30
 manager = pygame_gui.UIManager((W, H), 'main.json')
 buttons = 'buttons.txt'
-saving_folder = r'D:\[Photo]'
+saving_folder = r'D:/[Photo]'
 open_folder = ''
 file_types = ('jpg', 'jpeg', 'png')
 img_original = pygame.Surface((W, H))
@@ -30,24 +30,16 @@ stat_option = False
 last_update_folder = ''
 stat = []
 full_screen = False
-len_open_folder = 0
+txt_stat = Text(30, position='left')
+txt_brown = Text(30, f_color='brown', position='left')
+txt_file_info = Text(35, font='font/Morice-Bejar.ttf', shadow='orange')
 
 
 # кнопки
-class Button(pygame_gui.elements.UIButton):
-    def __init__(self, x, y, w, h, text, mngr, visible=1):
-        pygame_gui.elements.UIButton.__init__(self, relative_rect=pygame.Rect((x, y), (w, h)),
-                                              text=text, manager=mngr, visible=visible)
+class Btn(Button):
+    def __init__(self, pos: tuple, text: str, mngr, visible=1):
+        Button.__init__(self, pos, text, mngr, visible=visible)
         self.group = []
-
-
-# надписи
-def print_text(message, x, y, f_color='black', bg_color=None, f_size=30, font='arial'):
-    font_type = pygame.font.SysFont(font, f_size)
-    shadow_surf = font_type.render(message, True, 'white')
-    text_surf = font_type.render(message, True, f_color, bg_color)
-    display.blit(shadow_surf, (x + 1, y + 1))
-    display.blit(text_surf, (x, y))
 
 
 def prompt_folder():  # диалоговое окно выбора папки
@@ -58,7 +50,7 @@ def prompt_folder():  # диалоговое окно выбора папки
     return dir_name
 
 
-def choice_buttons_layout():
+def choice_buttons_layout():  # выбор макета кнопок
     top = tkinter.Tk()
     top.withdraw()
     file_name = tkinter.filedialog.askopenfilename(parent=top)
@@ -119,7 +111,7 @@ def buttons_draw():
             if num > 20:
                 break
             group = line.split(' ')[0]
-            group_btn = Button(x, y, w, h, group, manager)
+            group_btn = Btn((x, y, w, h), group, manager)
             all_group_btn.append(group_btn)
             step = 0
             up_frame = 0
@@ -128,7 +120,7 @@ def buttons_draw():
                 up_frame -= (num - bottom_frame) * 50
             for girl in line.split(' ')[1:]:
                 member = girl.rstrip()
-                girl_btn = Button(x - 190, y + up_frame + step, w - 60, h, member, manager, visible=0)
+                girl_btn = Btn((x - 190, y + up_frame + step, w - 60, h), member, manager, visible=0)
                 group_btn.group.append(girl_btn)
                 all_girl_btn.append(girl_btn)
                 step += 50
@@ -154,8 +146,8 @@ def statistic():
 def draw_stat():
     place, step = 1, 0
     for value, name in stat:
-        upd_color = 'yellow' if name == last_update_folder else None
-        print_text(f'{place}. {name}: {value}', 10, 60 + step, bg_color=upd_color)
+        txt_stat.shadow = 'orange' if name == last_update_folder else 'gray'
+        txt_stat.write((10, 60 + step, 300, 30), f'{place}. {name}: {value}')
         place += 1
         step += 32
         if place > 25:
@@ -171,25 +163,32 @@ def full_screen_switch():
         display = pygame.display.set_mode((W, H))
 
 
-def prog_bar(x, y, w, h, progress, max_progress=100, color1='gray', bg_color='black', surf=display):
-    pygame.draw.rect(surf, bg_color, (x, y, w, h))
-    progress = max_progress if progress > max_progress else progress
-    pygame.draw.rect(surf, color1, (x, y, w, progress / max_progress * h))
+def color_resolution():  # возвращает цвет, в зависимости от разрешения фото
+    if iw > ih:  # горизонтальные фото, смотрим ширину
+        if iw < 1000:
+            return 'red'
+        elif iw < 1300:
+            return 'orange'
+    else:  # вертикальные фото, смотрим высоту
+        if ih < 800:
+            return 'red'
+        elif ih < 1000:
+            return 'orange'
+    return 'gray50'
 
 
 def start():
-    global open_folder, saving_folder, stat_option, len_open_folder, buttons
-    del_bt = Button(10, H - 130, 160, 45, '[Удалить]', manager)
-    other_bt = Button(180, H - 130, 160, 45, '[Прочее]', manager)
-    load_bt = Button(550, H - 150, 800, 60, 'Загрузить изображение', manager)
-    input_bt = Button(10, H - 80, 100, 35, '---', manager)
-    output_bt = Button(10, H - 40, 100, 35, '---', manager)
-    stat_bt = Button(10, 10, 200, 45, 'Статистика', manager)
-    f_bt = Button(220, 10, 50, 45, 'F', manager)
-    z_bt = Button(280, 10, 50, 45, 'Z', manager)
-    x_bt = Button(340, 10, 50, 45, 'X', manager)
-    counter = Text(40, 'white')
-    buttons_draw()
+    global open_folder, saving_folder, stat_option, buttons
+    max_len = None
+    del_bt = Btn((10, 950, 160, 45), '[Удалить]', manager)
+    other_bt = Btn((180, 950, 160, 45), '[Прочее]', manager)
+    load_bt = Btn((550, 930, 800, 60), 'Загрузить изображение', manager)
+    input_bt = Btn((10, 1000, 100, 35), '---', manager)
+    output_bt = Btn((10, 1040, 100, 35), '---', manager)
+    stat_bt = Btn((10, 10, 200, 45), 'Статистика', manager)
+    f_bt = Btn((220, 10, 50, 45), 'F', manager)
+    z_bt = Btn((280, 10, 50, 45), 'Z', manager)
+    x_bt = Btn((340, 10, 50, 45), 'X', manager)
     while True:
         time_delta = clock.tick(fps)
         display.fill('gray')
@@ -217,13 +216,14 @@ def start():
                         save_load(sub('\n', '', event.ui_element.text))
                         statistic()
                     if event.ui_element == load_bt:
+                        buttons_draw()
                         image_load()
                         statistic()
                     if event.ui_element == stat_bt:
                         stat_option = not stat_option
                 if event.ui_element == input_bt:
                     open_folder = prompt_folder()
-                    len_open_folder = len(listdir(open_folder)) if open_folder else 0
+                    max_len = len(listdir(open_folder))
                 if event.ui_element == output_bt:
                     saving_folder = prompt_folder()
                 if event.ui_element == f_bt:
@@ -241,14 +241,16 @@ def start():
 
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
         if open_folder and len(listdir(open_folder)):
-            prog_bar(W - 5, 0, 5, H, len_open_folder - len(listdir(open_folder)), len_open_folder)
             num = len(listdir(open_folder))
-            counter.write((10, 900, 100, 45), f'{num}')
-        print_text(f'Из: {open_folder}', 120, 1000, 'brown')
-        print_text(f'В: {saving_folder}', 120, 1040, 'brown')
+            pb = ProgressBar((200, 45), 40, max_bar=max_len, color1='gray50', shadow='orange')
+            pb.draw((10, 900), f'{num}', num)
+        txt_brown.write((120, 1000, 400, 35), f'Из: {open_folder}')
+        txt_brown.write((120, 1040, 400, 35), f'В: {saving_folder}')
         load_bt.show() if open_folder and not img_name else load_bt.hide()
         if img_name:
-            print_text(f'{img_name}  ( {iw} / {ih} )', 400, 10, 'brown')
+            txt_file_info.rect = color_resolution()
+            txt_file_info.write((800, 1040, 85, 35), f'{img_name.split('.')[-1]}')
+            txt_file_info.write((890, 1040, 230, 35), f'{iw} / {ih}')
             del_bt.show()
             other_bt.show()
         else:

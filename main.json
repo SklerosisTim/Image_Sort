@@ -21,7 +21,7 @@
     "font": {
       "name": "Morice-Bejar",
       "size": 35,
-      "regular_path": "Morice-Bejar.ttf"
+      "regular_path": "font/Morice-Bejar.ttf"
     },
     "misc": {
       "shape": "rounded_rectangle",
