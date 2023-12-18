@@ -16,31 +16,21 @@ display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 30
 manager = pygame_gui.UIManager((W, H), 'json/main.json')
+img_original = pygame.Surface((W, H))
+img_opened = pygame.Surface((W, H))
+file_types = ('jpg', 'jpeg', 'png')
 buttons = 'buttons.txt'
 saving_folder = r'D:/[Photo]'
 open_folder = ''
-file_types = ('jpg', 'jpeg', 'png')
-img_original = pygame.Surface((W, H))
-img_opened = pygame.Surface((W, H))
 img_name = ''
 img_path = ''
 last_saving_img_path = ''
+last_update_folder = ''
 all_group_btn = []
 all_girl_btn = []
-stat_option = False
-last_update_folder = ''
 stat = []
+stat_option = False
 full_screen = False
-txt_stat = Text(30, position='left')
-txt_brown = Text(30, f_color='brown', position='left')
-txt_file_info = Text(35, font='font/Morice-Bejar.ttf', shadow='orange')
-
-
-# кнопки
-class Btn(Button):
-    def __init__(self, pos: tuple, text: str, mngr, visible=1):
-        Button.__init__(self, pos, text, mngr, visible=visible)
-        self.group = []
 
 
 def prompt_folder():  # диалоговое окно выбора папки
@@ -130,7 +120,7 @@ def buttons_draw():
             if num > 20:
                 break
             group = line.split(' ')[0]
-            group_btn = Btn((x, y, w, h), group, manager)
+            group_btn = Button((x, y, w, h), group, manager)
             all_group_btn.append(group_btn)
             step = 0
             up_frame = 0
@@ -139,7 +129,7 @@ def buttons_draw():
                 up_frame -= (num - bottom_frame) * 50
             for girl in line.split(' ')[1:]:
                 member = girl.rstrip()
-                girl_btn = Btn((x - 190, y + up_frame + step, w - 60, h), member, manager, visible=0)
+                girl_btn = Button((x - 190, y + up_frame + step, w - 60, h), member, manager, visible=0)
                 group_btn.group.append(girl_btn)
                 all_girl_btn.append(girl_btn)
                 step += 50
@@ -163,6 +153,7 @@ def statistic():
 
 
 def draw_stat():
+    txt_stat = Text(30, position='left')
     place, step = 1, 0
     for value, name in stat:
         txt_stat.shadow = 'orange' if name == last_update_folder else 'gray'
@@ -198,15 +189,17 @@ def color_resolution():  # возвращает цвет, в зависимос�
 
 def start():
     global open_folder, saving_folder, stat_option, buttons
-    del_bt = Btn((1300, 1030, 160, 45), '[Удалить]', manager)
-    other_bt = Btn((1130, 1030, 160, 45), '[Прочее]', manager)
-    load_bt = Btn((550, 930, 800, 60), 'Загрузить изображение', manager)
-    input_bt = Btn((10, 1000, 100, 35), '---', manager)
-    output_bt = Btn((10, 1040, 100, 35), '---', manager)
-    stat_bt = Btn((10, 10, 200, 45), 'Статистика', manager)
-    f_bt = Btn((220, 10, 50, 45), 'F', manager)
-    z_bt = Btn((280, 10, 50, 45), 'Z', manager)
-    x_bt = Btn((340, 10, 50, 45), 'X', manager)
+    del_bt = Button((1300, 1030, 160, 45), '[Удалить]', manager)
+    other_bt = Button((1130, 1030, 160, 45), '[Прочее]', manager)
+    load_bt = Button((550, 930, 800, 60), 'Загрузить изображение', manager)
+    input_bt = Button((10, 1000, 100, 35), '---', manager)
+    output_bt = Button((10, 1040, 100, 35), '---', manager)
+    stat_bt = Button((10, 10, 200, 45), 'Статистика', manager)
+    f_bt = Button((220, 10, 50, 45), 'F', manager)
+    z_bt = Button((280, 10, 50, 45), 'Z', manager)
+    x_bt = Button((340, 10, 50, 45), 'X', manager)
+    txt_brown = Text(30, f_color='brown', position='left')
+    txt_file_info = Text(35, font='font/Morice-Bejar.ttf', shadow='orange')
     max_len = 1
     read_conf()
     buttons_draw()

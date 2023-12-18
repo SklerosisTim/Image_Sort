@@ -10,6 +10,7 @@ class Button(elements.UIButton):  # кнопки
     def __init__(self, pos: tuple, text, manager, tooltip=None, object_id=None, visible=1):
         elements.UIButton.__init__(self, relative_rect=pygame.Rect(pos), text=text, manager=manager,
                                    tool_tip_text=tooltip, object_id=object_id, visible=visible)
+        self.group = []
 
 
 class Text:
