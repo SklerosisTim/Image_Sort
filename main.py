@@ -6,6 +6,7 @@ from subprocess import run
 from sys import exit
 from os import listdir, path, remove, mkdir
 from re import sub
+from json import load, dump
 from interface import Text, Button, ProgressBar
 
 pygame.init()
@@ -14,7 +15,7 @@ iw, ih = 1920, 1080
 display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 30
-manager = pygame_gui.UIManager((W, H), 'main.json')
+manager = pygame_gui.UIManager((W, H), 'json/main.json')
 buttons = 'buttons.txt'
 saving_folder = r'D:/[Photo]'
 open_folder = ''
@@ -56,6 +57,24 @@ def choice_buttons_layout():  # выбор макета кнопок
     file_name = tkinter.filedialog.askopenfilename(parent=top)
     top.destroy()
     return file_name
+
+
+def read_conf():
+    global open_folder, saving_folder, buttons
+    try:
+        with open('json/config.json', 'r', encoding='utf8') as config_file:
+            conf_dict = load(config_file)
+            open_folder = conf_dict['open_folder']
+            saving_folder = conf_dict['saving_folder']
+            buttons = conf_dict['buttons']
+    except FileNotFoundError:
+        pass
+
+
+def write_conf():
+    conf_dict = {'open_folder': open_folder, 'saving_folder': saving_folder, 'buttons': buttons}
+    with open('json/config.json', 'w', encoding='utf8') as config_file:
+        dump(conf_dict, config_file, indent=2, ensure_ascii=False)
 
 
 def image_load():
@@ -179,7 +198,6 @@ def color_resolution():  # возвращает цвет, в зависимос�
 
 def start():
     global open_folder, saving_folder, stat_option, buttons
-    max_len = None
     del_bt = Btn((1300, 1030, 160, 45), '[Удалить]', manager)
     other_bt = Btn((1130, 1030, 160, 45), '[Прочее]', manager)
     load_bt = Btn((550, 930, 800, 60), 'Загрузить изображение', manager)
@@ -189,11 +207,15 @@ def start():
     f_bt = Btn((220, 10, 50, 45), 'F', manager)
     z_bt = Btn((280, 10, 50, 45), 'Z', manager)
     x_bt = Btn((340, 10, 50, 45), 'X', manager)
+    max_len = 1
+    read_conf()
+    buttons_draw()
     while True:
         time_delta = clock.tick(fps)
         display.fill('gray')
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                write_conf()
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYUP:
@@ -201,7 +223,7 @@ def start():
                     full_screen_switch()
                 if event.key == pygame.K_z:
                     if last_saving_img_path:
-                        pygame.time.wait(200)
+                        pygame.time.wait(500)
                         run('explorer /select, ' + last_saving_img_path)
                 if event.key == pygame.K_x:
                     buttons = choice_buttons_layout()
@@ -212,25 +234,24 @@ def start():
                     switch_btn_visible(event.ui_element.group)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if open_folder:
-                    if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt):
+                    if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt, x_bt):
                         save_load(sub('\n', '', event.ui_element.text))
                         statistic()
                     if event.ui_element == load_bt:
-                        buttons_draw()
+                        max_len = len(listdir(open_folder))
                         image_load()
                         statistic()
                     if event.ui_element == stat_bt:
                         stat_option = not stat_option
                 if event.ui_element == input_bt:
                     open_folder = prompt_folder()
-                    max_len = len(listdir(open_folder))
                 if event.ui_element == output_bt:
                     saving_folder = prompt_folder()
                 if event.ui_element == f_bt:
                     full_screen_switch()
                 if event.ui_element == z_bt:
                     if last_saving_img_path:
-                        pygame.time.wait(200)
+                        pygame.time.wait(500)
                         run('explorer /select, ' + last_saving_img_path)
                 if event.ui_element == x_bt:
                     buttons = choice_buttons_layout()
