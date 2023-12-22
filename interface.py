@@ -1,15 +1,17 @@
 import pygame
-from pygame_gui import elements
+import pygame_gui
+import tkinter
+import tkinter.filedialog
 
 pygame.init()
 W, H = 1920, 1080
 display = pygame.display.set_mode((W, H))
 
 
-class Button(elements.UIButton):  # кнопки
-    def __init__(self, pos: tuple, text, manager, tooltip=None, object_id=None, visible=1):
-        elements.UIButton.__init__(self, relative_rect=pygame.Rect(pos), text=text, manager=manager,
-                                   tool_tip_text=tooltip, object_id=object_id, visible=visible)
+class Button(pygame_gui.elements.UIButton):  # кнопки
+    def __init__(self, pos: tuple, text, manager_, tooltip=None, object_id=None, visible=1):
+        pygame_gui.elements.UIButton.__init__(self, relative_rect=pygame.Rect(pos), text=text, manager=manager_,
+                                              tool_tip_text=tooltip, object_id=object_id, visible=visible)
         self.group = []
 
 
@@ -76,3 +78,34 @@ class ProgressBar:
             pygame.draw.rect(display, self.color2, rect_minus, border_radius=self.radius)
         if self.f_size:
             text.write((pos, self.b_size), txt)
+
+
+def prompt_folder():  # диалоговое окно выбора папки
+    top = tkinter.Tk()
+    top.withdraw()
+    dir_name = tkinter.filedialog.askdirectory(parent=top)
+    top.destroy()
+    return dir_name
+
+
+def choice_buttons_layout():  # выбор макета кнопок
+    top = tkinter.Tk()
+    top.withdraw()
+    file_name = tkinter.filedialog.askopenfilename(parent=top)
+    top.destroy()
+    return file_name
+
+
+manager = pygame_gui.UIManager((W, H), 'json/main.json')
+txt_brown = Text(30, f_color='brown', position='left')
+txt_file_info = Text(35, font='font/Morice-Bejar.ttf', shadow='orange')
+txt_message = Text(35, shadow='orange', position='left')
+del_bt = Button((1300, 1030, 160, 45), '[Удалить]', manager)
+other_bt = Button((1130, 1030, 160, 45), '[Прочее]', manager)
+load_bt = Button((550, 930, 800, 60), 'Загрузить изображение', manager)
+input_bt = Button((10, 1000, 100, 35), '---', manager)
+output_bt = Button((10, 1040, 100, 35), '---', manager)
+stat_bt = Button((10, 10, 200, 45), 'Статистика', manager)
+f_bt = Button((220, 10, 50, 45), 'F', manager)
+z_bt = Button((280, 10, 50, 45), 'Z', manager)
+x_bt = Button((340, 10, 50, 45), 'X', manager)

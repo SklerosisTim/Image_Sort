@@ -1,6 +1,3 @@
-import tkinter
-import tkinter.filedialog
-import pygame_gui
 from subprocess import run
 from sys import exit
 from os import listdir, path, remove, mkdir
@@ -11,7 +8,6 @@ from interface import *
 iw, ih = 1920, 1080
 clock = pygame.time.Clock()
 fps = 30
-manager = pygame_gui.UIManager((W, H), 'json/main.json')
 img_original = pygame.Surface((W, H))
 img_opened = pygame.Surface((W, H))
 file_types = ('jpg', 'jpeg', 'png')
@@ -27,22 +23,6 @@ all_girl_btn = []
 stat = {}
 stat_option = False
 full_screen = False
-
-
-def prompt_folder():  # диалоговое окно выбора папки
-    top = tkinter.Tk()
-    top.withdraw()
-    dir_name = tkinter.filedialog.askdirectory(parent=top)
-    top.destroy()
-    return dir_name
-
-
-def choice_buttons_layout():  # выбор макета кнопок
-    top = tkinter.Tk()
-    top.withdraw()
-    file_name = tkinter.filedialog.askopenfilename(parent=top)
-    top.destroy()
-    return file_name
 
 
 def read_conf():
@@ -159,6 +139,15 @@ def write_stat():
         dump(sorted_stat, stat_file, indent=2, ensure_ascii=False)
 
 
+def update_stat(name_folder):
+    global stat
+    sorted_stat = {}
+    stat[name_folder] += 1
+    for key_value in sorted(stat.items(), key=lambda item: item[1], reverse=True):
+        sorted_stat[key_value[0]] = key_value[1]
+    stat = sorted_stat
+
+
 def draw_stat():
     txt_stat = Text(30, position='left')
     place = 1
@@ -196,18 +185,8 @@ def start():
     read_conf()
     read_stat()
     buttons_draw()
-    del_bt = Button((1300, 1030, 160, 45), '[Удалить]', manager)
-    other_bt = Button((1130, 1030, 160, 45), '[Прочее]', manager)
-    load_bt = Button((550, 930, 800, 60), 'Загрузить изображение', manager)
-    input_bt = Button((10, 1000, 100, 35), '---', manager)
-    output_bt = Button((10, 1040, 100, 35), '---', manager)
-    stat_bt = Button((10, 10, 200, 45), 'Статистика', manager)
-    f_bt = Button((220, 10, 50, 45), 'F', manager)
-    z_bt = Button((280, 10, 50, 45), 'Z', manager)
-    x_bt = Button((340, 10, 50, 45), 'X', manager)
-    txt_brown = Text(30, f_color='brown', position='left')
-    txt_file_info = Text(35, font='font/Morice-Bejar.ttf', shadow='orange')
     max_len = len(listdir(open_folder)) if open_folder else 1
+    show_message, timer = False, 30
     while True:
         time_delta = clock.tick(fps)
         display.fill('gray')
@@ -236,7 +215,11 @@ def start():
                     if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt, x_bt):
                         name_folder = sub('\n', '', event.ui_element.text)
                         save_load(name_folder)
-                        stat[name_folder] += 1
+                        update_stat(name_folder)
+                        if not show_message:
+                            show_message = True
+                        else:
+                            timer = 30
                     if event.ui_element == load_bt:
                         image_load()
                     if event.ui_element == stat_bt:
@@ -263,7 +246,9 @@ def start():
 
             manager.process_events(event)
 
-        display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
+        timer = timer - 1 if show_message else 30
+        show_message = False if timer == 0 else show_message
+        display.blit(img_opened, (960 - img_opened.get_rect().centerx, 540 - img_opened.get_rect().centery))
         if open_folder and len(listdir(open_folder)):
             num = len(listdir(open_folder))
             pb = ProgressBar((200, 60), 50, max_bar=max_len, color1='gray50', shadow='orange')
@@ -271,6 +256,8 @@ def start():
         txt_brown.write((120, 1000, 400, 35), f'Из: {open_folder}')
         txt_brown.write((120, 1040, 400, 35), f'В: {saving_folder}')
         load_bt.show() if open_folder and not img_name else load_bt.hide()
+        if show_message:
+            txt_message.write((450, 10, 800, 45), f'Сохранено в {last_update_folder}')
         if img_name:
             txt_file_info.rect = color_resolution()
             txt_file_info.write((800, 1030, 85, 45), f'{img_name.split('.')[-1]}')
