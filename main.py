@@ -1,18 +1,14 @@
 import tkinter
 import tkinter.filedialog
-import pygame
 import pygame_gui
 from subprocess import run
 from sys import exit
 from os import listdir, path, remove, mkdir
 from re import sub
 from json import load, dump
-from interface import Text, Button, ProgressBar
+from interface import *
 
-pygame.init()
-W, H = 1920, 1080
 iw, ih = 1920, 1080
-display = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 fps = 30
 manager = pygame_gui.UIManager((W, H), 'json/main.json')
@@ -28,7 +24,7 @@ last_saving_img_path = ''
 last_update_folder = ''
 all_group_btn = []
 all_girl_btn = []
-stat = []
+stat = {}
 stat_option = False
 full_screen = False
 
@@ -142,35 +138,43 @@ def buttons_kill():
     [girl.kill() for girl in all_girl_btn]
 
 
-def statistic():
-    stat.clear()
+def read_stat():
+    global stat
+    try:
+        with open('json/stat.json', 'r', encoding='utf8') as stat_file:
+            stat = load(stat_file)
+    except FileNotFoundError:
+        pass
+
+
+def write_stat():
+    folder_stat, sorted_stat = {}, {}
     for name in listdir(saving_folder):
-        if name not in ('[Удалить]', '[Прочее]', '[разобрать]'):
-            path_name = path.join(saving_folder, name)
-            if path.isdir(path_name):
-                stat.append([len(listdir(path_name)), name])
-    stat.sort(reverse=True)
+        path_name = path.join(saving_folder, name)
+        if path.isdir(path_name):
+            folder_stat[name] = len(listdir(path_name))
+    for key_value in sorted(folder_stat.items(), key=lambda item: item[1], reverse=True):
+        sorted_stat[key_value[0]] = key_value[1]
+    with open('json/stat.json', 'w', encoding='utf8') as stat_file:
+        dump(sorted_stat, stat_file, indent=2, ensure_ascii=False)
 
 
 def draw_stat():
     txt_stat = Text(30, position='left')
-    place, step = 1, 0
-    for value, name in stat:
-        txt_stat.shadow = 'orange' if name == last_update_folder else 'gray'
-        txt_stat.write((10, 60 + step, 300, 30), f'{place}. {name}: {value}')
-        place += 1
-        step += 32
-        if place > 25:
-            break
+    place = 1
+    for name, value in stat.items():
+        if name not in ('[Удалить]', '[Прочее]', '[разобрать]'):
+            txt_stat.shadow = 'orange' if name == last_update_folder else 'gray'
+            txt_stat.write((10, 50 + place * 32, 300, 30), f'{place}. {name}: {value}')
+            place += 1
+            if place > 25:
+                break
 
 
 def full_screen_switch():
-    global display, full_screen
+    global full_screen
     full_screen = not full_screen
-    if full_screen:
-        display = pygame.display.set_mode((W, H), pygame.FULLSCREEN)
-    else:
-        display = pygame.display.set_mode((W, H))
+    pygame.display.set_mode((W, H), pygame.FULLSCREEN) if full_screen else pygame.display.set_mode((W, H))
 
 
 def color_resolution():  # возвращает цвет, в зависимости от разрешения фото
@@ -189,6 +193,9 @@ def color_resolution():  # возвращает цвет, в зависимос�
 
 def start():
     global open_folder, saving_folder, stat_option, buttons
+    read_conf()
+    read_stat()
+    buttons_draw()
     del_bt = Button((1300, 1030, 160, 45), '[Удалить]', manager)
     other_bt = Button((1130, 1030, 160, 45), '[Прочее]', manager)
     load_bt = Button((550, 930, 800, 60), 'Загрузить изображение', manager)
@@ -200,15 +207,14 @@ def start():
     x_bt = Button((340, 10, 50, 45), 'X', manager)
     txt_brown = Text(30, f_color='brown', position='left')
     txt_file_info = Text(35, font='font/Morice-Bejar.ttf', shadow='orange')
-    max_len = 1
-    read_conf()
-    buttons_draw()
+    max_len = len(listdir(open_folder)) if open_folder else 1
     while True:
         time_delta = clock.tick(fps)
         display.fill('gray')
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 write_conf()
+                write_stat()
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYUP:
@@ -228,18 +234,22 @@ def start():
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if open_folder:
                     if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt, x_bt):
-                        save_load(sub('\n', '', event.ui_element.text))
-                        statistic()
+                        name_folder = sub('\n', '', event.ui_element.text)
+                        save_load(name_folder)
+                        stat[name_folder] += 1
                     if event.ui_element == load_bt:
-                        max_len = len(listdir(open_folder))
                         image_load()
-                        statistic()
                     if event.ui_element == stat_bt:
                         stat_option = not stat_option
                 if event.ui_element == input_bt:
                     open_folder = prompt_folder()
+                    write_stat()
+                    read_stat()
+                    max_len = len(listdir(open_folder))
                 if event.ui_element == output_bt:
                     saving_folder = prompt_folder()
+                    write_stat()
+                    read_stat()
                 if event.ui_element == f_bt:
                     full_screen_switch()
                 if event.ui_element == z_bt:
@@ -256,8 +266,8 @@ def start():
         display.blit(img_opened, (W // 2 - img_opened.get_rect().centerx, H // 2 - img_opened.get_rect().centery))
         if open_folder and len(listdir(open_folder)):
             num = len(listdir(open_folder))
-            pb = ProgressBar((200, 40), 40, max_bar=max_len, color1='gray50', shadow='orange')
-            pb.draw((10, 950), f'{num}', num)
+            pb = ProgressBar((200, 60), 50, max_bar=max_len, color1='gray50', shadow='orange')
+            pb.draw((10, 930), f'{num}', num)
         txt_brown.write((120, 1000, 400, 35), f'Из: {open_folder}')
         txt_brown.write((120, 1040, 400, 35), f'В: {saving_folder}')
         load_bt.show() if open_folder and not img_name else load_bt.hide()

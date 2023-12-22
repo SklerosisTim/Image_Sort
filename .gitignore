@@ -1,3 +1,4 @@
 /.idea
 /venv
 /json/config.json
+/json/stat.json
