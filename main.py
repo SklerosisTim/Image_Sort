@@ -23,6 +23,8 @@ all_girl_btn = []
 stat = {}
 stat_option = False
 full_screen = False
+scroll = False
+stat_num = 0
 
 
 def read_conf():
@@ -131,7 +133,7 @@ def write_stat():
     folder_stat, sorted_stat = {}, {}
     for name in listdir(saving_folder):
         path_name = path.join(saving_folder, name)
-        if path.isdir(path_name):
+        if path.isdir(path_name) and not name.startswith('['):
             folder_stat[name] = len(listdir(path_name))
     for key_value in sorted(folder_stat.items(), key=lambda item: item[1], reverse=True):
         sorted_stat[key_value[0]] = key_value[1]
@@ -141,6 +143,8 @@ def write_stat():
 
 def update_stat(name_folder):
     global stat
+    if name_folder.startswith('['):
+        return
     sorted_stat = {}
     stat[name_folder] += 1
     for key_value in sorted(stat.items(), key=lambda item: item[1], reverse=True):
@@ -148,15 +152,15 @@ def update_stat(name_folder):
     stat = sorted_stat
 
 
-def draw_stat():
+def draw_stat(n):
     txt_stat = Text(30, position='left')
     place = 1
-    for name, value in stat.items():
-        if name not in ('[Удалить]', '[Прочее]', '[разобрать]'):
-            txt_stat.shadow = 'orange' if name == last_update_folder else 'gray'
-            txt_stat.write((10, 50 + place * 32, 300, 30), f'{place}. {name}: {value}')
+    for num, name_value in enumerate(stat.items()):
+        if num >= n:
+            txt_stat.shadow = 'orange' if name_value[0] == last_update_folder else 'gray'
+            txt_stat.write((10, 30 + place * 32, 300, 30), f'{place + n}. {name_value[0]}: {name_value[1]}')
             place += 1
-            if place > 25:
+            if num > 23 + n:
                 break
 
 
@@ -180,8 +184,18 @@ def color_resolution():  # возвращает цвет, в зависимос�
     return 'gray50'
 
 
+def stat_scroll(vector):
+    global stat_num
+    if vector < 0:
+        if stat_num > 0:
+            stat_num -= 1
+    else:
+        if stat_num < len(stat) - 25:
+            stat_num += 1
+
+
 def start():
-    global open_folder, saving_folder, stat_option, buttons
+    global open_folder, saving_folder, stat_option, buttons, scroll
     read_conf()
     read_stat()
     buttons_draw()
@@ -210,9 +224,19 @@ def start():
             if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
                 if event.ui_element not in all_girl_btn:
                     switch_btn_visible(event.ui_element.group)
+                if event.ui_element == scroll_bt:
+                    scroll = True
+            if event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
+                if event.ui_element == scroll_bt:
+                    scroll = False
+            if event.type == pygame.MOUSEBUTTONDOWN and scroll:
+                if event.button == 4:
+                    stat_scroll(-1)
+                if event.button == 5:
+                    stat_scroll(1)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if open_folder:
-                    if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt, x_bt):
+                    if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt, x_bt, scroll_bt):
                         name_folder = sub('\n', '', event.ui_element.text)
                         save_load(name_folder)
                         update_stat(name_folder)
@@ -269,7 +293,7 @@ def start():
             del_bt.hide()
             other_bt.hide()
 
-        draw_stat() if stat_option else None
+        draw_stat(stat_num) if stat_option else None
         manager.update(time_delta)
         manager.draw_ui(display)
         pygame.display.update()
