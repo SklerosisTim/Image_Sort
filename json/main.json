@@ -29,5 +29,20 @@
       "border_width": "2",
       "shadow_width": "2"
     }
+  },
+  "tool_tip": {
+    "misc": {
+      "rect_width": "200"
+    }
+  },
+  "tool_tip.text_box": {
+    "colours": {
+      "normal_text": "black",
+      "dark_bg": "gray",
+      "normal_border": "black"
+    },
+    "misc": {
+      "border_width": "2"
+    }
   }
 }

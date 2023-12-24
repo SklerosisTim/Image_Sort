@@ -47,7 +47,7 @@ class Text:
 
 class ProgressBar:
     def __init__(self, b_size, f_size=0, bg=None, max_bar=1000, color1='blue', color2='red',
-                 border=2, radius=5, shadow='gray'):
+                 border=2, radius=15, shadow='gray'):
         self.b_size = b_size
         self.f_size = f_size
         self.f_color = 'black'
@@ -99,13 +99,13 @@ def choice_buttons_layout():  # выбор макета кнопок
 manager = pygame_gui.UIManager((W, H), 'json/main.json')
 txt_brown = Text(30, f_color='brown', position='left')
 txt_file_info = Text(35, font='font/Morice-Bejar.ttf', shadow='orange')
-txt_message = Text(35, shadow='orange', position='left')
+txt_message = Text(35, 'white', 'orange')
 del_bt = Button((1300, 1030, 160, 45), '[Удалить]', manager)
 other_bt = Button((1130, 1030, 160, 45), '[Прочее]', manager)
 load_bt = Button((550, 930, 800, 60), 'Загрузить изображение', manager)
 input_bt = Button((10, 1000, 100, 35), '---', manager)
 output_bt = Button((10, 1040, 100, 35), '---', manager)
 stat_bt = Button((10, 10, 200, 45), 'Статистика', manager)
-f_bt = Button((220, 10, 50, 45), 'F', manager)
-z_bt = Button((280, 10, 50, 45), 'Z', manager)
-x_bt = Button((340, 10, 50, 45), 'X', manager)
+f_bt = Button((220, 10, 50, 45), 'F', manager, 'Полноэкранный режим')
+z_bt = Button((280, 10, 50, 45), 'Z', manager, 'Открыть расположение последнего сохраненного фото')
+x_bt = Button((340, 10, 50, 45), 'X', manager, 'Выбрать другой файл макета кнопок')

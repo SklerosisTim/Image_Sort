@@ -257,7 +257,8 @@ def start():
         txt_brown.write((120, 1040, 400, 35), f'В: {saving_folder}')
         load_bt.show() if open_folder and not img_name else load_bt.hide()
         if show_message:
-            txt_message.write((450, 10, 800, 45), f'Сохранено в {last_update_folder}')
+            w = 280 + (len(last_update_folder) * 20)
+            txt_message.write(((960 - (w // 2)), 980, w, 45), f'Сохранено в {last_update_folder}')
         if img_name:
             txt_file_info.rect = color_resolution()
             txt_file_info.write((800, 1030, 85, 45), f'{img_name.split('.')[-1]}')
