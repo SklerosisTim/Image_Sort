@@ -1,7 +1,6 @@
 from subprocess import run
 from sys import exit
 from os import listdir, path, remove, mkdir
-from re import sub
 from json import load, dump
 from interface import *
 
@@ -237,7 +236,7 @@ def start():  # главный цикл
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if open_folder:
                     if event.ui_element in all_girl_btn + all_group_btn + [del_bt, other_bt]:
-                        name_folder = sub('\n', '', event.ui_element.text)
+                        name_folder = event.ui_element.text.rstrip()  # текст кнопки = папка переноса
                         save_load(name_folder)  # перенос фото в новую папку
                         update_stat(name_folder)  # упрощенное обновление статистики
                         if not show_message:  # включение сообщения о сохранении фото
@@ -272,7 +271,7 @@ def start():  # главный цикл
             manager.process_events(event)
 
         timer = timer - 1 if show_message else 30  # если показано сообщение - работает таймер
-        show_message = False if timer == 0 else show_message  # сообщение тушится когда таймер на 0
+        show_message = False if timer < 1 else show_message  # сообщение тушится когда таймер на 0
         display.blit(img_opened, (960 - img_opened.get_rect().centerx, 540 - img_opened.get_rect().centery))
         if open_folder and len(listdir(open_folder)):  # прогресс бар со счетчиком файлов в рабочей папке
             num = len(listdir(open_folder))
