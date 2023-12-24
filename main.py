@@ -8,26 +8,26 @@ from interface import *
 iw, ih = 1920, 1080
 clock = pygame.time.Clock()
 fps = 30
-img_original = pygame.Surface((W, H))
-img_opened = pygame.Surface((W, H))
-file_types = ('jpg', 'jpeg', 'png')
-buttons = 'buttons.txt'
-saving_folder = r'D:/[Photo]'
-open_folder = ''
-img_name = ''
-img_path = ''
-last_saving_img_path = ''
-last_update_folder = ''
-all_group_btn = []
-all_girl_btn = []
-stat = {}
+img_original = pygame.Surface((W, H))  # оригинальная фото
+img_opened = pygame.Surface((W, H))  # подогнанная под экран фото
+file_types = ('jpg', 'jpeg', 'png')  # поддерживаемые расширения
+buttons = 'buttons.txt'  # макет кнопок
+saving_folder = r'D:/[Photo]'  # целевая папка
+open_folder = ''  # рабочая папка
+img_name = ''  # имя открытой фото
+img_path = ''  # путь к открытой фото
+last_saving_img_path = ''  # путь к последней сохраненной фото
+last_update_folder = ''  # папка последней сохраненной фото
+all_group_btn = []  # родительские кнопки
+all_girl_btn = []  # дочерние кнопки
+stat = {}  # статистика
 stat_option = False
 full_screen = False
 scroll = False
-stat_num = 0
+stat_num = 0  # начальное положение статистики
 
 
-def read_conf():
+def read_conf():  # чтение конфига из json
     global open_folder, saving_folder, buttons
     try:
         with open('json/config.json', 'r', encoding='utf8') as config_file:
@@ -35,22 +35,22 @@ def read_conf():
             open_folder = conf_dict['open_folder']
             saving_folder = conf_dict['saving_folder']
             buttons = conf_dict['buttons']
-    except FileNotFoundError:
+    except FileNotFoundError:  # если конфига нет - используем настройки по умолчанию
         pass
 
 
-def write_conf():
+def write_conf():  # запись конфига в json
     conf_dict = {'open_folder': open_folder, 'saving_folder': saving_folder, 'buttons': buttons}
     with open('json/config.json', 'w', encoding='utf8') as config_file:
         dump(conf_dict, config_file, indent=2, ensure_ascii=False)
 
 
-def image_load():
+def image_load():  # отрисовка фото на экране
     global open_folder, img_opened, img_path, img_name, img_original, iw, ih
     img_list = listdir(open_folder)
-    if len(img_list) > 0:
+    if len(img_list) > 0:  # проверка на наличие фото в рабочей папке
         for img in img_list:
-            if img.split('.')[-1] in file_types:
+            if img.split('.')[-1] in file_types:  # проверка поддерживаемых расширений фото
                 path_img = path.join(open_folder, img)
                 original = pygame.image.load(path_img).convert()
                 iw, ih = original.get_size()
@@ -61,66 +61,66 @@ def image_load():
                 img_opened = resize_img
                 img_name = img
                 img_path = path_img
-                return
-    open_folder = ''
+                return  # закрываем функцию если фото успешно загружено, если нет - идем дальше по циклу
+    open_folder = ''  # если рабочая папка не содержит файлов с поддерживаемыми расширениями - обнуляем все переменные
     img_opened = pygame.Surface((W, H))
     img_name = ''
     img_path = ''
 
 
-def save_load(name_target_folder):
+def save_load(name_target_folder):  # перенос фото из рабочей папки в целевую
     global last_update_folder, last_saving_img_path
     last_update_folder = name_target_folder
-    target_folder = path.normpath(path.join(saving_folder, name_target_folder))
-    if not path.isdir(target_folder):
+    target_folder = path.normpath(path.join(saving_folder, name_target_folder))  # путь к целевой папке
+    if not path.isdir(target_folder):  # если целевой папки нет - создаем
         mkdir(target_folder)
     if img_name:
-        last_saving_img_path = path.normpath(path.join(target_folder, img_name))
-        pygame.image.save(img_original, last_saving_img_path)
+        last_saving_img_path = path.normpath(path.join(target_folder, img_name))  # путь к фото для сохранения
+        pygame.image.save(img_original, last_saving_img_path)  # сохраняем фото в целевую папку
         print(f'{img_name} сохранено в {target_folder}')
-        remove(img_path)
+        remove(img_path)  # удаляем фото из рабочей папки
         image_load()
 
 
-def switch_btn_visible(list_btn):
-    for btn in all_girl_btn:
+def switch_btn_visible(list_btn):  # переключение отображения дочерних кнопок
+    for btn in all_girl_btn:  # сначала выключается видимость всех дочерних кнопок
         btn.visible = 0
-    if list_btn:
+    if list_btn:  # если передан список дочерних кнопок - включается их видимость
         for btn in list_btn:
             btn.visible = 1
 
 
-def buttons_draw():
+def buttons_draw():  # отрисовка кнопок
     global all_group_btn, all_girl_btn
-    with open(buttons, 'r', encoding='utf8') as girl_groups:
+    with open(buttons, 'r', encoding='utf8') as girl_groups:  # читаем макет кнопок из txt-файла
         x, y, w, h = 1670, 10, 240, 45
-        for num, line in enumerate(girl_groups):
-            if num > 20:
+        for num, line in enumerate(girl_groups):  # построчный перебор макета
+            if num > 20:  # максимум кнопок - 21
                 break
-            group = line.split(' ')[0]
+            group = line.split(' ')[0]  # родительская кнопка - первое слово в строке
             group_btn = Button((x, y, w, h), group, manager)
-            all_group_btn.append(group_btn)
-            step = 0
-            up_frame = 0
-            bottom_frame = 22 - len(line.split(' '))
-            if num > bottom_frame:
-                up_frame -= (num - bottom_frame) * 50
+            all_group_btn.append(group_btn)  # добавление в группу родительских кнопок
+            step = 0  # сдвиг дочерних кнопок по вертикали вниз
+            up_frame = 0  # положение верхней дочерней кнопки по отношению к родительской
+            bottom_frame = 22 - len(line.split(' '))  # положение нижней кнопки
+            if num > bottom_frame:  # если нижняя кнопка выходит за рамки экрана
+                up_frame -= (num - bottom_frame) * 50  # тогда верхняя кнопка сдвигается вверх на нужное расстояние
             for girl in line.split(' ')[1:]:
-                member = girl.rstrip()
+                member = girl.rstrip()  # дочерние кнопки - все последующие слова в строке
                 girl_btn = Button((x - 190, y + up_frame + step, w - 60, h), member, manager, visible=0)
-                group_btn.group.append(girl_btn)
-                all_girl_btn.append(girl_btn)
-                step += 50
-            y += 50
+                group_btn.group.append(girl_btn)  # присвоение дочерней кнопки к родительской
+                all_girl_btn.append(girl_btn)  # добавление в группу дочерних кнопок
+                step += 50  # для дочерних кнопок
+            y += 50  # для родительских кнопок
 
 
-def buttons_kill():
+def buttons_kill():  # очистка списков кнопок
     global all_group_btn, all_girl_btn
     [group.kill() for group in all_group_btn]
     [girl.kill() for girl in all_girl_btn]
 
 
-def read_stat():
+def read_stat():  # чтение статистики из json
     global stat
     try:
         with open('json/stat.json', 'r', encoding='utf8') as stat_file:
@@ -129,7 +129,7 @@ def read_stat():
         pass
 
 
-def write_stat():
+def write_stat():  # реальный подсчет, сортировка и запись статистики в json
     folder_stat, sorted_stat = {}, {}
     for name in listdir(saving_folder):
         path_name = path.join(saving_folder, name)
@@ -141,26 +141,26 @@ def write_stat():
         dump(sorted_stat, stat_file, indent=2, ensure_ascii=False)
 
 
-def update_stat(name_folder):
+def update_stat(name_folder):  # упрощенное обновление статистики без реального подсчета файлов
     global stat
     if name_folder.startswith('['):
         return
     sorted_stat = {}
-    stat[name_folder] += 1
-    for key_value in sorted(stat.items(), key=lambda item: item[1], reverse=True):
+    stat[name_folder] += 1  # просто прибавляем единичку к значению последней обновленной папки в словаре
+    for key_value in sorted(stat.items(), key=lambda item: item[1], reverse=True):  # заново сортируем словарь
         sorted_stat[key_value[0]] = key_value[1]
     stat = sorted_stat
 
 
-def draw_stat(n):
-    txt_stat = Text(30, position='left')
+def draw_stat():  # отрисовка статистики
     place = 1
     for num, name_value in enumerate(stat.items()):
-        if num >= n:
+        if num >= stat_num:  # определяем начало статистики для отрисовки
             txt_stat.shadow = 'orange' if name_value[0] == last_update_folder else 'gray'
-            txt_stat.write((10, 30 + place * 32, 300, 30), f'{place + n}. {name_value[0]}: {name_value[1]}')
+            txt = f'{place + stat_num}. {name_value[0]}: {name_value[1]}'
+            txt_stat.write((10, 30 + place * 32, 300, 30), txt)
             place += 1
-            if num > 23 + n:
+            if num > 23 + stat_num:  # определяем конец статистики для отрисовки
                 break
 
 
@@ -184,7 +184,7 @@ def color_resolution():  # возвращает цвет, в зависимос�
     return 'gray50'
 
 
-def stat_scroll(vector):
+def stat_scroll(vector):  # прокрутка статистики
     global stat_num
     if vector < 0:
         if stat_num > 0:
@@ -194,8 +194,8 @@ def stat_scroll(vector):
             stat_num += 1
 
 
-def start():
-    global open_folder, saving_folder, stat_option, buttons, scroll
+def start():  # главный цикл
+    global open_folder, saving_folder, stat_option, buttons, scroll, stat_num
     read_conf()
     read_stat()
     buttons_draw()
@@ -205,85 +205,86 @@ def start():
         time_delta = clock.tick(fps)
         display.fill('gray')
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:  # запись конфига и статистики при закрытии программы
                 write_conf()
                 write_stat()
                 pygame.quit()
                 exit()
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_f:
+            if event.type == pygame.KEYUP:  # горячие клавиши
+                if event.key == pygame.K_f:  # полноэкранный режим
                     full_screen_switch()
-                if event.key == pygame.K_z:
+                if event.key == pygame.K_z:  # открытие последнего сохраненного фото в проводнике
                     if last_saving_img_path:
                         pygame.time.wait(500)
                         run('explorer /select, ' + last_saving_img_path)
-                if event.key == pygame.K_x:
+                if event.key == pygame.K_x:  # смена макета кнопок
                     buttons = choice_buttons_layout()
                     buttons_kill()
                     buttons_draw()
             if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
-                if event.ui_element not in all_girl_btn:
-                    switch_btn_visible(event.ui_element.group)
-                if event.ui_element == scroll_bt:
+                if event.ui_element in all_group_btn:  # при наведении на родительскую кнопку
+                    switch_btn_visible(event.ui_element.group)  # показываются ее дочерние - чужие скрываются
+                if event.ui_element == stat_bt:  # включение режима прокрутки при наведении на кнопку
                     scroll = True
             if event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
-                if event.ui_element == scroll_bt:
+                if event.ui_element == stat_bt:  # выключение режима прокрутки
                     scroll = False
-            if event.type == pygame.MOUSEBUTTONDOWN and scroll:
+            if event.type == pygame.MOUSEBUTTONDOWN and scroll:  # прокрутка статистики
                 if event.button == 4:
                     stat_scroll(-1)
                 if event.button == 5:
                     stat_scroll(1)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if open_folder:
-                    if event.ui_element not in (load_bt, input_bt, output_bt, stat_bt, f_bt, z_bt, x_bt, scroll_bt):
+                    if event.ui_element in all_girl_btn + all_group_btn + [del_bt, other_bt]:
                         name_folder = sub('\n', '', event.ui_element.text)
-                        save_load(name_folder)
-                        update_stat(name_folder)
-                        if not show_message:
+                        save_load(name_folder)  # перенос фото в новую папку
+                        update_stat(name_folder)  # упрощенное обновление статистики
+                        if not show_message:  # включение сообщения о сохранении фото
                             show_message = True
-                        else:
+                        else:  # если сообщение уже было - таймер запускается заново
                             timer = 30
                     if event.ui_element == load_bt:
                         image_load()
-                    if event.ui_element == stat_bt:
+                    if event.ui_element == stat_bt:  # вкл./откл. статистики
                         stat_option = not stat_option
-                if event.ui_element == input_bt:
+                        stat_num = 0
+                if event.ui_element == input_bt:  # выбор рабочей папки
                     open_folder = prompt_folder()
                     write_stat()
                     read_stat()
                     max_len = len(listdir(open_folder))
-                if event.ui_element == output_bt:
+                if event.ui_element == output_bt:  # выбор папки сохранения
                     saving_folder = prompt_folder()
                     write_stat()
                     read_stat()
-                if event.ui_element == f_bt:
+                if event.ui_element == f_bt:  # полноэкранный режим
                     full_screen_switch()
-                if event.ui_element == z_bt:
+                if event.ui_element == z_bt:  # открытие последнего сохраненного фото в проводнике
                     if last_saving_img_path:
                         pygame.time.wait(500)
                         run('explorer /select, ' + last_saving_img_path)
-                if event.ui_element == x_bt:
+                if event.ui_element == x_bt:  # смена макета кнопок
                     buttons = choice_buttons_layout()
                     buttons_kill()
                     buttons_draw()
 
             manager.process_events(event)
 
-        timer = timer - 1 if show_message else 30
-        show_message = False if timer == 0 else show_message
+        timer = timer - 1 if show_message else 30  # если показано сообщение - работает таймер
+        show_message = False if timer == 0 else show_message  # сообщение тушится когда таймер на 0
         display.blit(img_opened, (960 - img_opened.get_rect().centerx, 540 - img_opened.get_rect().centery))
-        if open_folder and len(listdir(open_folder)):
+        if open_folder and len(listdir(open_folder)):  # прогресс бар со счетчиком файлов в рабочей папке
             num = len(listdir(open_folder))
             pb = ProgressBar((200, 60), 50, max_bar=max_len, color1='gray50', shadow='orange')
             pb.draw((10, 930), f'{num}', num)
         txt_brown.write((120, 1000, 400, 35), f'Из: {open_folder}')
         txt_brown.write((120, 1040, 400, 35), f'В: {saving_folder}')
         load_bt.show() if open_folder and not img_name else load_bt.hide()
-        if show_message:
-            w = 280 + (len(last_update_folder) * 20)
+        if show_message:  # сообщение о сохраненном фото с указанием целевой папки
+            w = 280 + (len(last_update_folder) * 20)  # ширина сообщения зависит от длинны названия целевой папки
             txt_message.write(((960 - (w // 2)), 980, w, 45), f'Сохранено в {last_update_folder}')
-        if img_name:
+        if img_name:  # отрисовка инфо о фото, расширение и размеры
             txt_file_info.rect = color_resolution()
             txt_file_info.write((800, 1030, 85, 45), f'{img_name.split('.')[-1]}')
             txt_file_info.write((890, 1030, 230, 45), f'{iw} / {ih}')
@@ -293,7 +294,7 @@ def start():
             del_bt.hide()
             other_bt.hide()
 
-        draw_stat(stat_num) if stat_option else None
+        draw_stat() if stat_option else None
         manager.update(time_delta)
         manager.draw_ui(display)
         pygame.display.update()
