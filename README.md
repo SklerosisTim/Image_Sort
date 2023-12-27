@@ -19,4 +19,4 @@ People Mom Dad Brother Sister
 ```
 The first word in the line is the *parent* button, all following it will be *child* buttons. When you cursor hover the parent button, the child buttons will be shown.
 Thanks to this, you can place 21 parent buttons, and 21 child buttons in each of them. Total 441 buttons.
-![](https://ibb.co/YjRqcYJ)
+![](https://github.com/SklerosisTim/Image_sort/blob/main/img/readme.gif)
