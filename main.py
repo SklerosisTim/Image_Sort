@@ -145,7 +145,7 @@ def update_stat(name_folder):  # упрощенное обновление ст�
     if name_folder.startswith('['):
         return
     sorted_stat = {}
-    stat[name_folder] += 1  # просто прибавляем единичку к значению последней обновленной папки в словаре
+    stat[name_folder] = stat[name_folder] + 1 if name_folder in stat else 1
     for key_value in sorted(stat.items(), key=lambda item: item[1], reverse=True):  # заново сортируем словарь
         sorted_stat[key_value[0]] = key_value[1]
     stat = sorted_stat
@@ -250,9 +250,7 @@ def start():  # главный цикл
                         stat_num = 0
                 if event.ui_element == input_bt:  # выбор рабочей папки
                     open_folder = prompt_folder()
-                    write_stat()
-                    read_stat()
-                    max_len = len(listdir(open_folder))
+                    max_len = len(listdir(open_folder)) if open_folder else 1
                 if event.ui_element == output_bt:  # выбор папки сохранения
                     saving_folder = prompt_folder()
                     write_stat()
