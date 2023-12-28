@@ -11,7 +11,7 @@ img_original = pygame.Surface((W, H))  # оригинальная фото
 img_opened = pygame.Surface((W, H))  # подогнанная под экран фото
 file_types = ('jpg', 'jpeg', 'png')  # поддерживаемые расширения
 buttons = 'buttons.txt'  # макет кнопок
-saving_folder = r'D:/[Photo]'  # целевая папка
+saving_folder = r'C:/[Photo]'  # целевая папка
 open_folder = ''  # рабочая папка
 img_name = ''  # имя открытой фото
 img_path = ''  # путь к открытой фото
@@ -130,14 +130,17 @@ def read_stat():  # чтение статистики из json
 
 def write_stat():  # реальный подсчет, сортировка и запись статистики в json
     folder_stat, sorted_stat = {}, {}
-    for name in listdir(saving_folder):
-        path_name = path.join(saving_folder, name)
-        if path.isdir(path_name) and not name.startswith('['):
-            folder_stat[name] = len(listdir(path_name))
-    for key_value in sorted(folder_stat.items(), key=lambda item: item[1], reverse=True):
-        sorted_stat[key_value[0]] = key_value[1]
-    with open('json/stat.json', 'w', encoding='utf8') as stat_file:
-        dump(sorted_stat, stat_file, indent=2, ensure_ascii=False)
+    try:
+        for name in listdir(saving_folder):
+            path_name = path.join(saving_folder, name)
+            if path.isdir(path_name) and not name.startswith('['):
+                folder_stat[name] = len(listdir(path_name))
+        for key_value in sorted(folder_stat.items(), key=lambda item: item[1], reverse=True):
+            sorted_stat[key_value[0]] = key_value[1]
+        with open('json/stat.json', 'w', encoding='utf8') as stat_file:
+            dump(sorted_stat, stat_file, indent=2, ensure_ascii=False)
+    except FileNotFoundError:
+        pass
 
 
 def update_stat(name_folder):  # упрощенное обновление статистики без реального подсчета файлов
@@ -253,8 +256,11 @@ def start():  # главный цикл
                     max_len = len(listdir(open_folder)) if open_folder else 1
                 if event.ui_element == output_bt:  # выбор папки сохранения
                     saving_folder = prompt_folder()
-                    write_stat()
-                    read_stat()
+                    if saving_folder:
+                        write_stat()
+                        read_stat()
+                    else:
+                        saving_folder = r'C:/[Photo]'
                 if event.ui_element == f_bt:  # полноэкранный режим
                     full_screen_switch()
                 if event.ui_element == z_bt:  # открытие последнего сохраненного фото в проводнике
