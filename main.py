@@ -145,11 +145,12 @@ def write_stat():  # реальный подсчет, сортировка и з
 
 def update_stat(name_folder):  # упрощенное обновление статистики без реального подсчета файлов
     global stat
-    if name_folder.startswith('['):
-        return
+    update_open_folder = open_folder.split('/')[-1]
+    if update_open_folder in stat:  # -1 от рабочей папки если она есть в статистике
+        stat[update_open_folder] -= 1
+    stat[name_folder] = stat[name_folder] + 1 if name_folder in stat else 1  # +1 в статистике к папке сохранения
     sorted_stat = {}
-    stat[name_folder] = stat[name_folder] + 1 if name_folder in stat else 1
-    for key_value in sorted(stat.items(), key=lambda item: item[1], reverse=True):  # заново сортируем словарь
+    for key_value in sorted(stat.items(), key=lambda item: item[1], reverse=True):  # повторная сортировка словаря
         sorted_stat[key_value[0]] = key_value[1]
     stat = sorted_stat
 
