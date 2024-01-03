@@ -130,10 +130,11 @@ def read_stat():  # чтение статистики из json
 
 def write_stat():  # реальный подсчет, сортировка и запись статистики в json
     folder_stat, sorted_stat = {}, {}
+    exception = open_folder.replace(saving_folder, '').split('/')[1] if open_folder else ''
     try:
         for name in listdir(saving_folder):
             path_name = path.join(saving_folder, name)
-            if path.isdir(path_name) and not name.startswith('['):
+            if path.isdir(path_name) and not name.startswith('[') and name != exception:
                 folder_stat[name] = len(listdir(path_name))
         for key_value in sorted(folder_stat.items(), key=lambda item: item[1], reverse=True):
             sorted_stat[key_value[0]] = key_value[1]
@@ -145,9 +146,8 @@ def write_stat():  # реальный подсчет, сортировка и з
 
 def update_stat(name_folder):  # упрощенное обновление статистики без реального подсчета файлов
     global stat
-    update_open_folder = open_folder.split('/')[-1]
-    if update_open_folder in stat:  # -1 от рабочей папки если она есть в статистике
-        stat[update_open_folder] -= 1
+    if name_folder.startswith('['):
+        return
     stat[name_folder] = stat[name_folder] + 1 if name_folder in stat else 1  # +1 в статистике к папке сохранения
     sorted_stat = {}
     for key_value in sorted(stat.items(), key=lambda item: item[1], reverse=True):  # повторная сортировка словаря
@@ -197,12 +197,19 @@ def stat_scroll(vector):  # прокрутка статистики
             stat_num += 1
 
 
+def remaining_images():  # кол-во файлов в рабочей папке
+    if open_folder:
+        return len(listdir(open_folder))
+    return 0
+
+
 def start():  # главный цикл
     global open_folder, saving_folder, stat_option, buttons, scroll, stat_num
     read_conf()
     read_stat()
     buttons_draw()
-    max_len = len(listdir(open_folder)) if open_folder else 1
+    max_img = len(listdir(open_folder)) if open_folder else 1
+    images = max_img
     show_message, timer = False, 30
     while True:
         time_delta = clock.tick(fps)
@@ -243,6 +250,7 @@ def start():  # главный цикл
                         name_folder = event.ui_element.text.rstrip()  # текст кнопки = папка переноса
                         save_load(name_folder)  # перенос фото в новую папку
                         update_stat(name_folder)  # упрощенное обновление статистики
+                        images = remaining_images()  # подсчет файлов в рабочей папке для отображения на прогресс-баре
                         if not show_message:  # включение сообщения о сохранении фото
                             show_message = True
                         else:  # если сообщение уже было - таймер запускается заново
@@ -254,7 +262,10 @@ def start():  # главный цикл
                         stat_num = 0
                 if event.ui_element == input_bt:  # выбор рабочей папки
                     open_folder = prompt_folder()
-                    max_len = len(listdir(open_folder)) if open_folder else 1
+                    max_img = len(listdir(open_folder)) if open_folder else 1
+                    images = max_img
+                    write_stat()
+                    read_stat()
                 if event.ui_element == output_bt:  # выбор папки сохранения
                     saving_folder = prompt_folder()
                     if saving_folder:
@@ -279,19 +290,17 @@ def start():  # главный цикл
         show_message = False if timer < 1 else show_message  # сообщение тушится когда таймер на 0
         display.blit(img_opened, (960 - img_opened.get_rect().centerx, 540 - img_opened.get_rect().centery))
         if open_folder and len(listdir(open_folder)):  # прогресс бар со счетчиком файлов в рабочей папке
-            num = len(listdir(open_folder))
-            pb = ProgressBar((200, 60), 50, max_bar=max_len, color1='gray50', shadow='orange')
-            pb.draw((10, 930), f'{num}', num)
+            pb = ProgressBar((200, 60), 50, max_bar=max_img, color1='gray50', shadow='orange')
+            pb.draw((10, 930), f'{images}', images)
         txt_brown.write((120, 1000, 400, 35), f'Из: {open_folder}')
         txt_brown.write((120, 1040, 400, 35), f'В: {saving_folder}')
         load_bt.show() if open_folder and not img_name else load_bt.hide()
         if show_message:  # сообщение о сохраненном фото с указанием целевой папки
             w = 280 + (len(last_update_folder) * 20)  # ширина сообщения зависит от длинны названия целевой папки
-            txt_message.write(((960 - (w // 2)), 980, w, 45), f'Сохранено в {last_update_folder}')
-        if img_name:  # отрисовка инфо о фото, расширение и размеры
+            txt_message.write(((900 - (w // 2)), 1020, w, 50), f'Сохранено в {last_update_folder}')
+        if img_name:
             txt_file_info.rect = color_resolution()
-            txt_file_info.write((800, 1030, 85, 45), f'{img_name.split('.')[-1]}')
-            txt_file_info.write((890, 1030, 230, 45), f'{iw} / {ih}')
+            txt_file_info.write((10, 880, 200, 45), f'{iw} / {ih}')  # отрисовка расширения фото
             del_bt.show()
             other_bt.show()
         else:
